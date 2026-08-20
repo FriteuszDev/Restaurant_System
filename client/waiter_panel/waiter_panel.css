@@ -1,0 +1,41 @@
+body {
+            margin: 0;
+            height: 100vh;
+            width: 100vw;
+            background-color: #f0f2f5;
+        }
+
+        .table_all {
+            background-color: rgb(173, 173, 173);
+            width: 70%;
+            height: 100%;
+            position: absolute;
+            right: 0;
+            top: 0;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .table {
+            background-color: red;
+            height: 100px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-size: 150%; 
+        }
+.table:hover {
+    cursor: pointer;
+}
+
+.table.green {
+    user-select: none;
+    background-color: green;
+}

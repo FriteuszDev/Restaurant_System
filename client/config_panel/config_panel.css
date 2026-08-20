@@ -1,0 +1,57 @@
+  body {
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+  
+  
+  .menu {
+    position: absolute;
+    right: 0%;
+    width: 70%;
+    background-color: rgb(212, 210, 210);
+    height: 80%;
+    overflow: auto;
+  }
+  .table_menu {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+  }
+  .th_menu, .td_menu, .td_menu_name, .td_menu_id {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  .th_menu {
+    background-color: #f2f2f2;
+  }
+
+
+
+  .table_add {
+    width: 70%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    height: 15%;
+    position: absolute;
+    bottom: 5%;
+    right: 0%;
+  }
+  .th_add, .td_addm {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+  .th_add {
+    background-color: #f2f2f2;
+  }
+
+  .btn_dish_add {
+    width: 100%;
+    height: 100%;
+  }
+
+  .fa-trash:hover {
+    cursor: pointer;
+  }
