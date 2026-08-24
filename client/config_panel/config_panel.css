@@ -139,6 +139,63 @@
 
 
 
-  .tr_menu:hover, .tr_employees:hover {
+  .tr_menu:hover, .tr_employees:hover, .tr_grades:hover {
     background-color: #c2c0c0;
   } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    .config_grades {
+    position: absolute;
+    right: 0%;
+    width: 80%;
+    background-color: rgb(212, 210, 210);
+    height: 100%;
+    overflow: auto;
+    display: none;
+  }
+  
+  .grades {
+    position: absolute;
+    right: 0%;
+    width: 100%;
+    background-color: rgb(212, 210, 210);
+    height: 80%;
+    overflow: auto;
+  }
+  .table_grades {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+  }
+  .th_grades, .td_grades, .td_grades_name, .td_grades_id {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+    
+  }
+  .th_grades {
+    background-color: #f2f2f2;
+  }
+
+
+  .fa-trash-can:hover {
+    cursor: pointer;
+  }

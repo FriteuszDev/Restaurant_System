@@ -58,6 +58,40 @@ fire_icons.forEach((fire, fire_i) => {
 
 
 
+
+let grade_delete_icon = document.querySelectorAll(".fa-trash-can")
+let all_grades_ids = document.querySelectorAll('.td_grade_id');
+
+grade_delete_icon.forEach((grade, grade_i) => {
+    grade.addEventListener("click", () => {
+        let GradeIdValue = all_grades_ids[grade_i].textContent;
+        console.log(GradeIdValue)
+
+        const formData = new FormData();
+        formData.append('gradeID', GradeIdValue);
+
+    fetch('../../php/delete_grade.php', {
+        method: 'POST',
+        body: formData
+    }).then(response => {
+        if (response.ok) {
+            location.reload();
+        }
+    });
+    })
+})
+
+
+
+
+
+
+
+
+
+
+
+
 ////////////////////////////////////////////////////////////////
 
 
@@ -103,3 +137,20 @@ tab_grades.addEventListener("click", () => {
     config_tables.style.display = "none"
     config_grades.style.display = "block"
 })
+
+
+
+function CheckBox(clickedCheckbox) {
+  if (clickedCheckbox.checked) {
+    document.querySelector('.config_auto_change').checked = true;
+  }
+}
+
+function uncheckAll(mainCheckbox) {
+  if (!mainCheckbox.checked) {
+    const children = document.querySelectorAll('.auto_change');
+    children.forEach(child => {
+      child.checked = false;
+    });
+  }
+}

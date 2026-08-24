@@ -21,6 +21,7 @@
         $stmt = $pdo->query("SELECT * FROM menu", PDO::FETCH_ASSOC);
         $stmt2 = $pdo->query("SELECT * FROM employees", PDO::FETCH_ASSOC);
         $stmt3 = $pdo->query("SELECT * FROM grades", PDO::FETCH_ASSOC);
+        $stmt5 = $pdo->query("SELECT * FROM grades", PDO::FETCH_ASSOC);
         
         
 
@@ -147,8 +148,138 @@
         </div>
 
 
-        <div class="config_grades">
 
+
+
+
+
+
+
+        <div class="config_grades">
+            <div class="grades">
+
+            
+            <table class="table_grades">
+                    <tr class="tr_grades">
+                        <th class="th_grades">ID:</th>
+                        <th class="th_grades">Name:</th>
+                        <th class="th_grades">Chef Panel Access:</th>
+                        <th class="th_grades">Waiter Panel Access:</th>
+                        <th class="th_grades">Config Panel Access:</th>
+                        <th class="th_grades">Add Dishes:</th>
+                        <th class="th_grades">Delete Dishes:</th>
+                        <th class="th_grades">Add Employees:</th>
+                        <th class="th_grades">Delete Employees:</th>
+                        <th class="th_grades">Add Grades:</th>
+                        <th class="th_grades">Delete Grades:</th>
+                        <th class="th_grades">Edit Tables:</th>
+                        <th class="th_grades"></th>
+                    </tr>
+                    
+                    <?php foreach ($stmt5 as $row):?>
+                        <tr class="tr_grades">
+                            <td class="td_grade_id"><?php echo $row['grade_id'] ?></td>
+                            <td class="td_grade_name"><?php echo htmlspecialchars($row['grade_name']) ?></td>
+
+                                <?php if($row['chef_access'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['waiter_access'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+                    
+                                <?php if($row['config_access'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['add_dishes'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['delete_dishes'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['add_employees'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['delete_employees'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['add_grades'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                                <?php if($row['delete_grades'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+                    
+                                <?php if($row['edit_tables'] == 1): ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i></td>
+                                <?php else: ?>
+                            <td class="td_grades"><i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i></td>
+                                <?php endif; ?>
+
+                            <td class="td_grades"><i class="fa-solid fa-trash-can" style="color: rgb(222, 36, 36);"></i></td>
+                        </tr>
+                    <?php endforeach;?>
+                    
+            
+            </table>
+            </div>
+            <table class="table_add">
+                <tr>
+                        <th class="th_grades">Name:</th>
+                        <th class="th_grades">Chef Panel Access:</th>
+                        <th class="th_grades">Waiter Panel Access:</th>
+                        <th class="th_grades">Config Panel Access:</th>
+                        <th class="th_grades">Add Dishes:</th>
+                        <th class="th_grades">Delete Dishes:</th>
+                        <th class="th_grades">Add Employees:</th>
+                        <th class="th_grades">Delete Employees:</th>
+                        <th class="th_grades">Add Grades:</th>
+                        <th class="th_grades">Delete Grades:</th>
+                        <th class="th_grades">Edit Tables:</th>
+                    <th class="th_add"></th>
+                </tr>
+                <tr class="tr_add">
+                    <form method="POST" action="../../php/add_grade.php">
+                        <td class="td_add"><input type="text" maxlength="25" name="name" required></td>
+                        <td class="td_add"><input type="checkbox" name="chef_access"></td>
+                        <td class="td_add"><input type="checkbox" name="waiter_access"></td>
+                        <td class="td_add"><input type="checkbox" name="config_access" onchange="uncheckAll(this)" class="config_auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="add_dishes" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="delete_dishes" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="add_employees" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="delete_employees" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="add_grades" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="delete_grades" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="edit_tables" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><button type="submit" class="btn_dish_add">ADD GRADE</button></td>
+                    </form>
+                </tr>
+            </table>
         </div>
 
 
