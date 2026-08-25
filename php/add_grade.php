@@ -4,37 +4,46 @@ $db = 'Restaurant_System';
 $user = 'root';
 $pass = '';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['name'])) {
 
-    $name = $_POST['name'];
-    $surname = $_POST['surname'];
-    $password = $_POST['password'];
-    $grade = $_POST['grade'];
+$name = $_POST['name'];
+
+$chef_access = isset($_POST['chef_access']) ? (int)$_POST['chef_access'] : 0;
+$waiter_access = isset($_POST['waiter_access']) ? (int)$_POST['waiter_access'] : 0;
+$config_access = isset($_POST['config_access']) ? (int)$_POST['config_access'] : 0;
+$delete_dishes = isset($_POST['delete_dishes']) ? (int)$_POST['delete_dishes'] : 0;
+$add_dishes = isset($_POST['add_dishes']) ? (int)$_POST['add_dishes'] : 0;
+$delete_employees = isset($_POST['delete_employees']) ? (int)$_POST['delete_employees'] : 0;
+$add_employees = isset($_POST['add_employees']) ? (int)$_POST['add_employees'] : 0;
+$delete_grades = isset($_POST['delete_grades']) ? (int)$_POST['delete_grades'] : 0;
+$add_grades = isset($_POST['add_grades']) ? (int)$_POST['add_grades'] : 0;
+$edit_tables = isset($_POST['edit_tables']) ? (int)$_POST['edit_tables'] : 0;
 
 
-    $password_coded = password_hash($password, PASSWORD_DEFAULT);
 
     try {
         $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 
-        $stmt = $pdo->prepare("SELECT grade_id FROM grades WHERE grade_name = :grade_name");
-        $stmt->execute([':grade_name' => $grade]);
-        $grade_id = $stmt->fetchColumn();
+        $sql = "INSERT INTO grades (grade_name, chef_access, waiter_access, config_access, delete_dishes, add_dishes, delete_employees, add_employees, delete_grades, add_grades, edit_tables) VALUES (:grade_name, :chef_access, :waiter_access, :config_access, :delete_dishes, :add_dishes, :delete_employees, :add_employees, :delete_grades, :add_grades, :edit_tables)";
+        $stmt = $pdo->prepare($sql);
 
-
-        $sql2 = "INSERT INTO employees (employee_name, employee_surname, employee_password, grade_id) VALUES (:e_name, :e_surname, :e_password, :e_gradeid)";
-        $stmt2 = $pdo->prepare($sql2);
-
-        $stmt2->execute([
-            'e_name' => $name,
-            'e_surname' => $surname,
-            'e_password' => $password_coded,
-            'e_gradeid' => $grade_id,
+        $stmt->execute([
+            'grade_name' => $name,
+            'chef_access' => $chef_access,
+            'waiter_access' => $waiter_access,
+            'config_access' => $config_access,
+            'delete_dishes' => $delete_dishes,
+            'add_dishes' => $add_dishes,
+            'delete_employees' => $delete_employees,
+            'add_employees' => $add_employees,
+            'delete_grades' => $delete_grades,
+            'add_grades' => $add_grades,
+            'edit_tables' => $edit_tables,
         ]);
 
-        echo "added dish";
+        echo "added grade";
 
     } catch (PDOException $e) {
         die("blad polaczenia " . $e->getMessage());

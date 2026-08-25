@@ -196,6 +196,6 @@
   }
 
 
-  .fa-trash-can:hover {
+  .fa-trash-can:hover, .fa-floppy-disk:hover {
     cursor: pointer;
   }

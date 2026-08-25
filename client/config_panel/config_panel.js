@@ -84,7 +84,63 @@ grade_delete_icon.forEach((grade, grade_i) => {
 
 
 
+let all_grade_save_icons = document.querySelectorAll(".fa-floppy-disk")
+let all_emp_ids = document.querySelectorAll(".td_employees_id")
 
+const selectedGrades = {};
+let all_emp_grade_select = document.querySelectorAll(".emp_grade_select");
+
+all_emp_grade_select.forEach((selectElement, index) => {
+    if (selectElement.tagName !== 'SELECT') return;
+
+    const key = selectElement.name || index;
+    const selectedOption = selectElement.options?.[selectElement.selectedIndex]; 
+
+    selectedGrades[key] = {
+        value: selectElement.value || '',
+        text: selectedOption ? selectedOption.text : ''
+    };
+
+    selectElement.addEventListener('change', (event) => {
+        const target = event.target;
+        const opt = target.options?.[target.selectedIndex];
+
+        selectedGrades[key] = {
+            value: target.value,
+            text: opt ? opt.text : ''
+        };
+    });
+
+});
+
+
+
+
+all_grade_save_icons.forEach((save_icon, save_icon_i) => {
+    save_icon.addEventListener("click", () => {
+        let emp_id = all_emp_ids[save_icon_i].textContent;
+
+        let row = save_icon.closest('tr');
+
+        let selectElement = row.querySelector('select');
+        let emp_grade_select = selectElement ? selectElement.value : null;
+
+        console.log(`${emp_id} --> ${emp_grade_select}`);
+
+        const formData = new FormData();
+        formData.append('emp_id', emp_id);
+        formData.append('new_grade_name', emp_grade_select);
+
+            fetch('../../php/save_grade.php', {
+            method: 'POST',
+            body: formData
+        }).then(response => {
+            if (response.ok) {
+                location.reload();
+            }
+        });
+    });
+});
 
 
 

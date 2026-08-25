@@ -99,6 +99,7 @@
                         <th class="th_employees">Name:</th>
                         <th class="th_employees">Surname:</th>
                         <th class="th_employees">Grade:</th>
+                        <th class="th_employees">Save Grade:</th>
                         <th class="th_employees"></th>
                     </tr>
                     
@@ -109,8 +110,23 @@
                             <td class="td_employees"><?php echo htmlspecialchars($row['employee_surname']) ?></td>
                             <?php $stmt4 = $pdo->prepare("SELECT grade_name FROM grades WHERE grade_id = :grade_id_fe"); 
                                 $stmt4->execute([':grade_id_fe' => $row['grade_id']]);
-                                $grade = $stmt4->fetchColumn();?>
-                            <td class="td_employees"><?php echo $grade ?></td>
+                                $grade_name = $stmt4->fetchColumn();
+
+                                $stmt6 = $pdo->prepare("SELECT grade_id, grade_name FROM grades");
+                                $stmt6->execute();
+                                $all_grades = $stmt6->fetchAll(PDO::FETCH_ASSOC);
+                                ?>
+                            <td class="td_employees"><select name="emp_grade">
+                                                    <?php foreach($all_grades as $grade):
+                                                            if ($grade['grade_id'] == $row['grade_id']):?>
+                                                                <option value="<?php echo $grade['grade_name'] ?>" class="emp_grade_select" selected><?php echo $grade['grade_name'] ?></option>
+                                                            <?php else: ?>
+                                                                <option value="<?php echo $grade['grade_name'] ?>" class="emp_grade_select"><?php echo $grade['grade_name'] ?></option>
+                                                                <?php endif; ?>
+                                                                <?php endforeach; ?>
+                                                    </select>
+                              </td>
+                            <td class="td_employees"><i class="fa-solid fa-floppy-disk"></i></td>
                             <td class="td_employees"><i class="fa-solid fa-user-minus" style="color: rgb(251, 59, 59);"></i></td>
                         </tr>
                     <?php endforeach;?>
@@ -266,16 +282,16 @@
                 <tr class="tr_add">
                     <form method="POST" action="../../php/add_grade.php">
                         <td class="td_add"><input type="text" maxlength="25" name="name" required></td>
-                        <td class="td_add"><input type="checkbox" name="chef_access"></td>
-                        <td class="td_add"><input type="checkbox" name="waiter_access"></td>
-                        <td class="td_add"><input type="checkbox" name="config_access" onchange="uncheckAll(this)" class="config_auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="add_dishes" onchange="CheckBox(this)" class="auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="delete_dishes" onchange="CheckBox(this)" class="auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="add_employees" onchange="CheckBox(this)" class="auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="delete_employees" onchange="CheckBox(this)" class="auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="add_grades" onchange="CheckBox(this)" class="auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="delete_grades" onchange="CheckBox(this)" class="auto_change"></td>
-                        <td class="td_add"><input type="checkbox" name="edit_tables" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="chef_access" value="1"></td>
+                        <td class="td_add"><input type="checkbox" name="waiter_access" value="1"></td>
+                        <td class="td_add"><input type="checkbox" name="config_access" value="1" onchange="uncheckAll(this)" class="config_auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="add_dishes" value="1" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="delete_dishes" value="1" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="add_employees" value="1" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="delete_employees" value="1" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="add_grades" value="1" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="delete_grades" value="1" onchange="CheckBox(this)" class="auto_change"></td>
+                        <td class="td_add"><input type="checkbox" name="edit_tables" value="1" onchange="CheckBox(this)" class="auto_change"></td>
                         <td class="td_add"><button type="submit" class="btn_dish_add">ADD GRADE</button></td>
                     </form>
                 </tr>
