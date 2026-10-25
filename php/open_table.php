@@ -1,0 +1,58 @@
+<?php
+require_once __DIR__ . '/auth.php';
+
+$employee = require_json_access('waiter_access');
+
+$table_id = (int) ($_POST['table_id'] ?? 0);
+
+if ($table_id <= 0) {
+    json_out(['success' => false, 'message' => 'Invalid table ID.'], 400);
+}
+
+$stmt = db()->prepare("SELECT table_id, table_number, status FROM restaurant_tables WHERE table_id = :table_id");
+$stmt->execute([':table_id' => $table_id]);
+$table = $stmt->fetch();
+
+if (!$table) {
+    json_out(['success' => false, 'message' => 'Table not found.'], 404);
+}
+
+$stmt = db()->prepare(
+    "SELECT session_id, status FROM table_sessions
+     WHERE table_id = :table_id AND status IN ('open', 'to_pay')
+     ORDER BY session_id DESC LIMIT 1"
+);
+$stmt->execute([':table_id' => $table_id]);
+$session = $stmt->fetch();
+
+if ($session) {
+    json_out([
+        'success' => true,
+        'message' => 'Table is already open.',
+        'session_id' => (int) $session['session_id'],
+        'session_status' => $session['status'],
+        'already_open' => true,
+    ]);
+}
+
+$stmt = db()->prepare(
+    "INSERT INTO table_sessions (table_id, waiter_id, status, opened_at)
+     VALUES (:table_id, :waiter_id, 'open', NOW())"
+);
+$stmt->execute([
+    ':table_id' => $table_id,
+    ':waiter_id' => $employee['employee_id'],
+]);
+
+$session_id = (int) db()->lastInsertId();
+
+$stmt = db()->prepare("UPDATE restaurant_tables SET status = 'occupied' WHERE table_id = :table_id");
+$stmt->execute([':table_id' => $table_id]);
+
+json_out([
+    'success' => true,
+    'message' => 'Table opened.',
+    'session_id' => $session_id,
+    'session_status' => 'open',
+    'already_open' => false,
+]);

@@ -1,55 +1,69 @@
 <?php
-$host = 'localhost';
-$db = 'Restaurant_System';
-$user = 'root';
-$pass = '';
+require_once __DIR__ . '/auth.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['name'])) {
+$current_employee = require_json_access('add_grades');
 
-$name = $_POST['name'];
+$name = trim($_POST['name'] ?? '');
 
-$chef_access = isset($_POST['chef_access']) ? (int)$_POST['chef_access'] : 0;
-$waiter_access = isset($_POST['waiter_access']) ? (int)$_POST['waiter_access'] : 0;
-$config_access = isset($_POST['config_access']) ? (int)$_POST['config_access'] : 0;
-$delete_dishes = isset($_POST['delete_dishes']) ? (int)$_POST['delete_dishes'] : 0;
-$add_dishes = isset($_POST['add_dishes']) ? (int)$_POST['add_dishes'] : 0;
-$delete_employees = isset($_POST['delete_employees']) ? (int)$_POST['delete_employees'] : 0;
-$add_employees = isset($_POST['add_employees']) ? (int)$_POST['add_employees'] : 0;
-$delete_grades = isset($_POST['delete_grades']) ? (int)$_POST['delete_grades'] : 0;
-$add_grades = isset($_POST['add_grades']) ? (int)$_POST['add_grades'] : 0;
-$edit_tables = isset($_POST['edit_tables']) ? (int)$_POST['edit_tables'] : 0;
+if ($name === '' || mb_strlen($name) > 15) {
+    json_out(['success' => false, 'message' => 'Position name must be 1-15 characters.'], 400);
+}
 
+$requested_flags = [];
+foreach (grade_permission_flags() as $flag) {
+    $requested_flags[$flag] = isset($_POST[$flag]) && (string) $_POST[$flag] !== '0' ? 1 : 0;
+}
 
+foreach ($requested_flags as $flag => $value) {
+    if ($value === 1 && !can_grant_permission($current_employee, $flag)) {
+        json_out([
+            'success' => false,
+            'message' => 'Nie mozesz przyznac uprawnienia, ktorego sam nie posiadasz.',
+        ], 403);
+    }
+}
 
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+try {
+    $pdo = db();
 
+    $stmt = $pdo->prepare("SELECT grade_id FROM grades WHERE grade_name = :grade_name");
+    $stmt->execute([':grade_name' => $name]);
 
-        $sql = "INSERT INTO grades (grade_name, chef_access, waiter_access, config_access, delete_dishes, add_dishes, delete_employees, add_employees, delete_grades, add_grades, edit_tables) VALUES (:grade_name, :chef_access, :waiter_access, :config_access, :delete_dishes, :add_dishes, :delete_employees, :add_employees, :delete_grades, :add_grades, :edit_tables)";
-        $stmt = $pdo->prepare($sql);
-
-        $stmt->execute([
-            'grade_name' => $name,
-            'chef_access' => $chef_access,
-            'waiter_access' => $waiter_access,
-            'config_access' => $config_access,
-            'delete_dishes' => $delete_dishes,
-            'add_dishes' => $add_dishes,
-            'delete_employees' => $delete_employees,
-            'add_employees' => $add_employees,
-            'delete_grades' => $delete_grades,
-            'add_grades' => $add_grades,
-            'edit_tables' => $edit_tables,
-        ]);
-
-        echo "added grade";
-
-    } catch (PDOException $e) {
-        die("blad polaczenia " . $e->getMessage());
+    if ($stmt->fetch()) {
+        json_out(['success' => false, 'message' => 'A position with this name already exists.'], 409);
     }
 
-    header("Location: ../client/config_panel/config_panel.php");
-    exit();
+    $columns = array_merge(['grade_name'], grade_permission_flags());
+    $placeholders = [];
+    $params = [':grade_name' => $name];
+    foreach ($columns as $column) {
+        $placeholders[] = ':' . $column;
+        if ($column !== 'grade_name') {
+            $params[':' . $column] = $requested_flags[$column];
+        }
+    }
+
+    $sql = 'INSERT INTO grades (' . implode(', ', $columns) . ') VALUES (' . implode(', ', $placeholders) . ')';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    $grade = array_merge([
+        'grade_id' => (int) $pdo->lastInsertId(),
+        'grade_name' => $name,
+    ], $requested_flags);
+
+    if (is_ajax_request()) {
+        json_out(['success' => true, 'message' => 'Position added.', 'grade' => $grade]);
+    }
+
+    echo "added grade";
+} catch (PDOException $e) {
+    if (is_ajax_request()) {
+        json_out(['success' => false, 'message' => 'Error saving position.'], 500);
+    }
+
+    die("Connection error " . $e->getMessage());
 }
-?>
+
+header("Location: ../client/config_panel/config_panel.php");
+exit();

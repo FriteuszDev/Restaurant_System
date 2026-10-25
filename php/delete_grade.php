@@ -1,29 +1,33 @@
 <?php
-$host = 'localhost';
-$db = 'Restaurant_System';
-$user = 'root';
-$pass = '';
+require_once __DIR__ . '/auth.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+require_json_access('delete_grades');
 
-    $GradeIdToDelete = $_POST['gradeID'] ?? 'None';
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$GradeIdToDelete = $_POST['gradeID'] ?? 'None';
 
-        $sql = "DELETE FROM grades WHERE grade_id = :grade_id";
-        $stmt = $pdo->prepare($sql);
+try {
+    $pdo = db();
 
-        $stmt->execute([
-            'grade_id' => $GradeIdToDelete
-        ]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM employees WHERE grade_id = :grade_id");
+    $stmt->execute([':grade_id' => $GradeIdToDelete]);
 
-        echo "grade deleted";
-
-    } catch (PDOException $e) {
-        die("blad polaczenia " . $e->getMessage());
+    if ((int) $stmt->fetchColumn() > 0) {
+        json_out([
+            'success' => false,
+            'message' => 'Cannot delete position - employees are assigned to it.',
+        ], 409);
     }
 
-    exit();
+    $sql = "DELETE FROM grades WHERE grade_id = :grade_id";
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        'grade_id' => $GradeIdToDelete
+    ]);
+
+    json_out(['success' => true, 'message' => 'Position deleted.']);
+} catch (PDOException $e) {
+    json_out(['success' => false, 'message' => 'Error deleting position.'], 500);
 }
-?>
+
+exit();

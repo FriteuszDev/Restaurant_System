@@ -1,0 +1,118 @@
+<?php
+require_once __DIR__ . '/auth.php';
+
+$employee = require_json_access('waiter_access');
+
+$session_id = (int) ($_POST['session_id'] ?? 0);
+$items = json_decode($_POST['items'] ?? '', true);
+
+if ($session_id <= 0) {
+    json_out(['success' => false, 'message' => 'Nieprawidlowe ID sesji stolika.'], 400);
+}
+
+if (!is_array($items) || count($items) === 0) {
+    json_out(['success' => false, 'message' => 'Brak pozycji zamowienia.'], 400);
+}
+
+if (count($items) > 50) {
+    json_out(['success' => false, 'message' => 'Za duzo pozycji w jednym zamowieniu (max 50).'], 400);
+}
+
+$stmt = db()->prepare("SELECT session_id, status FROM table_sessions WHERE session_id = :session_id");
+$stmt->execute([':session_id' => $session_id]);
+$session = $stmt->fetch();
+
+if (!$session) {
+    json_out(['success' => false, 'message' => 'Nie znaleziono sesji stolika.'], 404);
+}
+
+if ($session['status'] !== 'open') {
+    json_out(['success' => false, 'message' => 'Do tego stolika nie mozna juz dodawac zamowien (oczekuje na plate).'], 409);
+}
+
+$dish_ids = [];
+foreach ($items as $item) {
+    $dish_id = (int) ($item['dish_id'] ?? 0);
+    $quantity = (int) ($item['quantity'] ?? 0);
+    $note = trim((string) ($item['note'] ?? ''));
+
+    if ($dish_id <= 0 || $quantity < 1 || $quantity > 99 || mb_strlen($note) > 255) {
+        json_out(['success' => false, 'message' => 'Nieprawidlowa pozycja zamowienia.'], 400);
+    }
+
+    $dish_ids[] = $dish_id;
+}
+
+$dish_ids = array_values(array_unique($dish_ids));
+
+$placeholders = implode(',', array_fill(0, count($dish_ids), '?'));
+$stmt = db()->prepare("SELECT dish_id, dish_name, dish_price FROM menu WHERE dish_id IN ($placeholders)");
+$stmt->execute($dish_ids);
+$dishes = [];
+
+while ($row = $stmt->fetch()) {
+    $dishes[(int) $row['dish_id']] = $row;
+}
+
+foreach ($dish_ids as $dish_id) {
+    if (!isset($dishes[$dish_id])) {
+        json_out(['success' => false, 'message' => 'Jedno z wybranych dan nie istnieje juz w menu.'], 409);
+    }
+}
+
+$pdo = db();
+$pdo->beginTransaction();
+
+try {
+    $stmt = $pdo->prepare(
+        "INSERT INTO orders (session_id, waiter_id, created_at)
+         VALUES (:session_id, :waiter_id, NOW())"
+    );
+    $stmt->execute([
+        ':session_id' => $session_id,
+        ':waiter_id' => $employee['employee_id'],
+    ]);
+    $order_id = (int) $pdo->lastInsertId();
+
+    $insert_stmt = $pdo->prepare(
+        "INSERT INTO order_items (order_id, dish_id, dish_name, dish_price, quantity, note, item_status)
+         VALUES (:order_id, :dish_id, :dish_name, :dish_price, :quantity, :note, 'new')"
+    );
+
+    $created = [];
+    foreach ($items as $item) {
+        $dish_id = (int) $item['dish_id'];
+        $quantity = (int) $item['quantity'];
+        $note = trim((string) ($item['note'] ?? ''));
+
+        $insert_stmt->execute([
+            ':order_id' => $order_id,
+            ':dish_id' => $dish_id,
+            ':dish_name' => $dishes[$dish_id]['dish_name'],
+            ':dish_price' => $dishes[$dish_id]['dish_price'],
+            ':quantity' => $quantity,
+            ':note' => $note === '' ? null : $note,
+        ]);
+
+        $created[] = [
+            'item_id' => (int) $pdo->lastInsertId(),
+            'dish_name' => $dishes[$dish_id]['dish_name'],
+            'dish_price' => $dishes[$dish_id]['dish_price'],
+            'quantity' => $quantity,
+            'note' => $note,
+            'item_status' => 'new',
+        ];
+    }
+
+    $pdo->commit();
+} catch (Exception $e) {
+    $pdo->rollBack();
+    json_out(['success' => false, 'message' => 'Blad zapisu zamowienia.'], 500);
+}
+
+json_out([
+    'success' => true,
+    'message' => 'Wyslano zamowienie do kuchni.',
+    'order_id' => $order_id,
+    'items' => $created,
+]);

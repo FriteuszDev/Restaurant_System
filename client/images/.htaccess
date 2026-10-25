@@ -1,0 +1,32 @@
+# ============================================================
+#  Katalog obrazow - serwowane statycznie, bez wykonywania skryptow.
+# ============================================================
+
+Options -Indexes
+
+# Wylacz PHP / CGI w tym katalogu (plik nie powinien byc tutaj wykonany).
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+<IfModule mod_php5.c>
+    php_flag engine off
+</IfModule>
+
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .pl .py .cgi .sh
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8 .phps .pl .py .cgi .sh
+
+# Serwuj tylko pliki graficzne.
+<FilesMatch "(?i)\.(png|jpe?g|gif|webp|svg)$">
+    Require all granted
+</FilesMatch>
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "(?i)\.(?!png|jpe?g|gif|webp|svg$)[a-z0-9]{1,10}$">
+        Require all denied
+    </FilesMatch>
+</IfModule>

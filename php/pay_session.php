@@ -1,0 +1,60 @@
+<?php
+require_once __DIR__ . '/auth.php';
+
+$employee = require_json_access('waiter_access');
+
+$session_id = (int) ($_POST['session_id'] ?? 0);
+
+if ($session_id <= 0) {
+    json_out(['success' => false, 'message' => 'Invalid table session ID.'], 400);
+}
+
+$stmt = db()->prepare("SELECT session_id, table_id, status FROM table_sessions WHERE session_id = :session_id");
+$stmt->execute([':session_id' => $session_id]);
+$session = $stmt->fetch();
+
+if (!$session) {
+    json_out(['success' => false, 'message' => 'Table session not found.'], 404);
+}
+
+if (!in_array($session['status'], ['open', 'to_pay'], true)) {
+    json_out(['success' => false, 'message' => 'This table session has already been paid.'], 409);
+}
+
+$stmt = db()->prepare(
+    "SELECT COUNT(*) AS items_count, COALESCE(SUM(oi.quantity * oi.dish_price), 0) AS total
+     FROM order_items oi
+     JOIN orders o ON o.order_id = oi.order_id
+     WHERE o.session_id = :session_id"
+);
+$stmt->execute([':session_id' => $session_id]);
+$summary = $stmt->fetch();
+
+if ((int) $summary['items_count'] === 0) {
+    json_out(['success' => false, 'message' => 'Cannot pay for table without orders.'], 409);
+}
+
+$total = number_format((float) $summary['total'], 2, '.', '');
+
+$stmt = db()->prepare(
+    "UPDATE table_sessions
+     SET status = 'paid', total = :total, paid_at = NOW(), paid_by = :employee_id
+     WHERE session_id = :session_id"
+);
+$stmt->execute([
+    ':total' => $total,
+    ':employee_id' => $employee['employee_id'],
+    ':session_id' => $session_id,
+]);
+
+$stmt = db()->prepare("UPDATE restaurant_tables SET status = 'free' WHERE table_id = :table_id");
+$stmt->execute([':table_id' => $session['table_id']]);
+
+json_out([
+    'success' => true,
+    'message' => 'Table paid.',
+    'summary' => [
+        'total' => $total,
+        'items_count' => (int) $summary['items_count'],
+    ],
+]);

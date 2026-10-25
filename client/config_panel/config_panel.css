@@ -1,96 +1,52 @@
-  body {
+* {
+    box-sizing: border-box;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
     margin: 0;
-    width: 100vw;
     height: 100vh;
-  }
-    .config_menu {
-    position: absolute;
-    right: 0%;
-    width: 80%;
     background-color: rgb(212, 210, 210);
-    height: 100%;
+    display: flex;
     overflow: auto;
-    display: block;
-  }
-  
-  .menu {
-    position: absolute;
-    right: 0%;
-    width: 100%;
-    background-color: rgb(212, 210, 210);
-    height: 80%;
-    overflow: auto;
-  }
-  .table_menu {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: Arial, sans-serif;
-  }
-  .th_menu, .td_menu, .td_menu_name, .td_menu_id {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
-  .th_menu {
-    background-color: #f2f2f2;
-  }
+}
 
+.hidden {
+    display: none !important;
+}
 
-
-  .table_add {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: Arial, sans-serif;
-    height: 15%;
-    position: absolute;
-    bottom: 5%;
-    right: 0%;
-  }
-  .th_add, .td_addm {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-  }
-  .th_add {
-    background-color: #f2f2f2;
-  }
-
-  .btn_dish_add {
-    width: 100%;
-    height: 100%;
-  }
-
-  .fa-trash:hover {
-    cursor: pointer;
-  }
 
 
 .tabs_container {
+    width: 240px;
+    min-width: 240px;
+    height: 100vh;
     background-color: rgb(225, 225, 225);
-    position: absolute;
-    left: 0%;
-    top: 0%;
-    width: 20%;
-    height: 100%;
-    user-select: none;
-}
-
-
-.tabs_container > div {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    font-weight: 900;
-    font-size: 200%;
-    color: rgb(54, 54, 54);
-    width: 100%;
-    height: 10%;
-    margin-left: 10px;
-    align-items: center;
-    justify-content: center;
     display: flex;
+    flex-direction: column;
+    user-select: none;
+    overflow-y: auto;
 }
 
-.tabs_container > div span {
-    margin-right: 10px;
+.tabs_container > .tab_menu,
+.tabs_container > .tab_employees,
+.tabs_container > .tab_grades,
+.tabs_container > .tab_tables,
+.tabs_container > .tab_settings {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 18px;
+    font-weight: 900;
+    font-size: 105%;
+    color: rgb(54, 54, 54);
+    border-bottom: 1px solid rgb(198, 198, 198);
+    transition: background-color 0.15s, color 0.15s;
 }
 
 .tabs_container > div:hover {
@@ -98,104 +54,966 @@
     cursor: pointer;
 }
 
-.fa-user-minus:hover {
-  cursor: pointer;
+.tabs_container > div.active {
+    background-color: rgb(60, 60, 60);
+    color: white;
+}
+
+.tabs_container > div span {
+    margin-right: 0;
+}
+
+.user_bar {
+    margin-top: auto;
+    padding: 14px 16px;
+    background-color: rgb(205, 204, 204);
+    border-top: 1px solid rgb(185, 185, 185);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 88%;
+}
+
+.user_info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: rgb(60, 60, 60);
+}
+
+.user_links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.user_links a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 9px;
+    border-radius: 6px;
+    color: rgb(70, 70, 70);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.user_links a:hover {
+    background-color: rgb(190, 190, 190);
+    color: rgb(25, 25, 25);
+}
+
+.config_top_logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 6px;
+    background-color: white;
+    padding: 3px;
+    box-sizing: border-box;
+}
+
+.user_name {
+    font-weight: 900;
+    font-size: 92%;
+    color: rgb(40, 40, 40);
+    margin-left: 4px;
+}
+
+.user_grade {
+    font-size: 82%;
+    opacity: 0.7;
+    color: rgb(60, 60, 60);
+}
+
+
+
+.config_menu,
+.config_employees,
+.config_grades,
+.config_tables {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 100vh;
+    background-color: rgb(212, 210, 210);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.config_menu.is-active,
+.config_employees.is-active,
+.config_grades.is-active,
+.config_tables.is-active {
+    display: flex;
+}
+
+.menu,
+.employees,
+.grades {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+    background-color: rgb(212, 210, 210);
+    overflow: auto;
+    padding: 14px;
+}
+
+.no_access_message {
+    margin: 18px;
+    padding: 16px 18px;
+    border-radius: 8px;
+    background-color: rgb(252, 226, 226);
+    border: 1px solid rgb(240, 170, 170);
+    color: rgb(150, 25, 25);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+
+.table_menu,
+.table_employees,
+.table_grades {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    background-color: rgb(250, 250, 250);
+}
+
+.th_menu,
+.td_menu,
+.td_menu_name,
+.td_menu_id {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.th_menu {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.th_employees,
+.td_employees,
+.td_employees_name,
+.td_employees_id {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.th_employees {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* ---- Employees table ---- */
+.th_employees,
+.td_employees,
+.td_employees_name,
+.td_employees_id,
+.th_employees_surname,
+.td_employees_surname,
+.th_employees_grade,
+.td_employees_grade {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.th_employees {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* Surname column: no border on its right edge */
+.th_employees_surname {
+    border-right: none;
+}
+
+.td_employees_surname {
+    border-right: none;
+}
+
+/* Grade column: no border on its left edge (matches Surname's right edge removal) */
+.th_employees_grade {
+    border-left: none;
+}
+
+.td_employees_grade {
+    border-left: none;
+}
+
+/* Surname ↔ Grade border: horizontal separator only, NO vertical border */
+.th_employees_surname {
+    border-right: none;
+}
+
+.td_employees_surname {
+    border-right: none;
+}
+
+.th_employees_grade {
+    border-left: none;
+}
+
+.td_employees_grade {
+    border-left: none;
+}
+
+/* Grade column: full vertical border on both sides (keeps the separator clean) */
+.th_employees_grade {
+    border-left: 1px solid #dddddd;
+    border-right: 1px solid #dddddd;
+}
+
+.td_employees_grade {
+    border-left: 1px solid #dddddd;
+    border-right: 1px solid #dddddd;
+}
+
+/* Delete column: no vertical border on either side */
+.th_employees_delete {
+    border-left: none;
+    border-right: none;
+}
+
+.td_employees_delete {
+    border-left: none;
+    border-right: none;
+}
+
+.th_grades,
+.td_grades,
+.td_grades_name,
+.td_grades_id {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.th_grades {
+    background-color: #f2f2f2;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.td_grade_id,
+.td_grade_name,
+.td_employees_id,
+.td_employees_name,
+.td_menu_id,
+.td_menu_name {
+    font-weight: 700;
+}
+
+.tr_menu:hover,
+.tr_employees:hover,
+.tr_grades:hover {
+    background-color: #c2c0c0;
+}
+
+
+
+.td_grades {
+    text-align: center;
+    cursor: pointer;
+    transition: opacity 0.15s, background-color 0.15s;
+}
+
+.td_grades.pending {
+    opacity: 0.45;
+    cursor: progress;
 }
 
 
 
 
-    .config_employees {
-    position: absolute;
-    right: 0%;
-    width: 80%;
-    background-color: rgb(212, 210, 210);
-    height: 100%;
-    overflow: auto;
-    display: none;
-  }
-  
-  .employees {
-    position: absolute;
-    right: 0%;
-    width: 100%;
-    background-color: rgb(212, 210, 210);
-    height: 80%;
-    overflow: auto;
-  }
-  .table_employees {
+.table_add {
     width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
-  }
-  .th_employees, .td_employees, .td_employees_name, .td_employees_id {
+    background-color: rgb(245, 245, 245);
+    flex: 0 0 auto;
+}
+
+.th_add,
+.td_add {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
-  }
-  .th_employees {
+}
+
+.th_add {
     background-color: #f2f2f2;
-  }
+}
 
-
-
-  .tr_menu:hover, .tr_employees:hover, .tr_grades:hover {
-    background-color: #c2c0c0;
-  } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    .config_grades {
-    position: absolute;
-    right: 0%;
-    width: 80%;
-    background-color: rgb(212, 210, 210);
-    height: 100%;
-    overflow: auto;
-    display: none;
-  }
-  
-  .grades {
-    position: absolute;
-    right: 0%;
+.td_add input,
+.td_add select {
     width: 100%;
-    background-color: rgb(212, 210, 210);
-    height: 80%;
-    overflow: auto;
-  }
-  .table_grades {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: Arial, sans-serif;
-  }
-  .th_grades, .td_grades, .td_grades_name, .td_grades_id {
-    border: 1px solid #dddddd;
-    text-align: left;
-    padding: 8px;
-    
-  }
-  .th_grades {
-    background-color: #f2f2f2;
-  }
+    padding: 7px 8px;
+    border: 1px solid rgb(180, 180, 180);
+    border-radius: 6px;
+    font-size: 95%;
+    background-color: white;
+}
 
-
-  .fa-trash-can:hover, .fa-floppy-disk:hover {
+.td_add input[type="checkbox"] {
+    width: auto;
+    min-width: 18px;
+    height: 18px;
     cursor: pointer;
-  }
+}
+
+.td_add label {
+    display: block;
+    font-size: 88%;
+    margin-bottom: 4px;
+    color: rgb(70, 70, 70);
+}
+
+.td_employees select {
+    width: 100%;
+    min-width: 110px;
+    padding: 6px 8px;
+    border: 1px solid rgb(180, 180, 180);
+    border-radius: 6px;
+    font-size: 95%;
+    background-color: white;
+    cursor: pointer;
+}
+
+.tr_add td {
+    vertical-align: middle;
+}
+
+.btn_dish_add {
+    width: 100%;
+    height: 100%;
+    min-height: 38px;
+    padding: 9px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgb(46, 125, 50);
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.btn_dish_add:hover {
+    background-color: rgb(38, 102, 41);
+}
+
+.btn_dish_add:disabled {
+    background-color: rgb(160, 160, 160);
+    cursor: not-allowed;
+}
+
+
+
+.tables_toolbar {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 14px;
+    background-color: rgb(225, 225, 225);
+    border-bottom: 1px solid rgb(195, 195, 195);
+}
+
+.toolbar_box {
+    flex: 1 1 240px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background-color: rgb(250, 250, 250);
+    border: 1px solid rgb(205, 205, 205);
+    border-radius: 8px;
+}
+
+.toolbar_title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 900;
+    font-size: 92%;
+    color: rgb(60, 60, 60);
+    width: 100%;
+}
+
+.toolbar_box input,
+.toolbar_box select {
+    flex: 1 1 110px;
+    min-width: 90px;
+    padding: 7px 8px;
+    border: 1px solid rgb(180, 180, 180);
+    border-radius: 6px;
+    font-size: 95%;
+    background-color: white;
+}
+
+.toolbar_box button {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgb(60, 60, 60);
+    color: white;
+    font-weight: 900;
+    font-size: 88%;
+    cursor: pointer;
+}
+
+.toolbar_box button:hover {
+    background-color: rgb(40, 40, 40);
+}
+
+.floors_container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px;
+}
+
+.floors_empty {
+    opacity: 0.65;
+    font-size: 92%;
+    padding: 10px 4px;
+}
+
+.floor_block {
+    margin-bottom: 14px;
+    background-color: rgb(250, 250, 250);
+    border: 1px solid rgb(205, 205, 205);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.floor_header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background-color: rgb(232, 232, 232);
+    border-bottom: 1px solid rgb(205, 205, 205);
+    font-weight: 900;
+    font-size: 95%;
+}
+
+.floor_name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: rgb(50, 50, 50);
+}
+
+.floor_count {
+    margin-left: auto;
+    font-weight: 700;
+    font-size: 85%;
+    color: rgb(90, 90, 90);
+}
+
+.floor_delete {
+    color: rgb(190, 40, 40);
+    padding: 2px 4px;
+}
+
+.floor_tables {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    padding: 12px;
+}
+
+.table_card {
+    position: relative;
+    min-height: 78px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: white;
+    font-weight: bold;
+    border: 3px solid transparent;
+    transition: transform 0.1s;
+}
+
+.table_card:hover {
+    transform: scale(1.03);
+}
+
+.table_card.status_free {
+    background-color: rgb(46, 125, 50);
+}
+
+.table_card.status_occupied {
+    background-color: rgb(198, 40, 40);
+}
+
+.table_card.status_to_pay {
+    background-color: rgb(230, 126, 34);
+}
+
+.table_card_number {
+    font-size: 125%;
+}
+
+.table_card_chairs {
+    font-size: 82%;
+    opacity: 0.9;
+}
+
+.table_delete {
+    position: absolute;
+    top: 7px;
+    right: 8px;
+    font-size: 85%;
+    opacity: 0.85;
+}
+
+.table_delete:hover {
+    opacity: 1;
+}
+
+
+
+#config_toasts {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 200;
+    pointer-events: none;
+}
+
+#config_toasts .toast {
+    background-color: rgb(40, 40, 40);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-weight: 700;
+    opacity: 0;
+    transform: translateX(20px);
+    transition: opacity 0.25s, transform 0.25s;
+    max-width: 340px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+#config_toasts .toast.error {
+    background-color: rgb(180, 30, 30);
+}
+
+#config_toasts .toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+
+
+.fa-trash:hover,
+.fa-user-minus:hover,
+.fa-trash-can:hover,
+.fa-floppy-disk:hover,
+.table_delete:hover,
+.floor_delete:hover {
+    cursor: pointer;
+}
+
+.td_grades.pending::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 6px;
+    vertical-align: middle;
+    border: 2px solid rgb(120, 120, 120);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: config_spin 0.7s linear infinite;
+}
+
+@keyframes config_spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+
+@media (max-width: 1100px) {
+    .tabs_container {
+        width: 200px;
+        min-width: 200px;
+    }
+}
+
+@media (max-width: 860px) {
+    body {
+        flex-direction: column;
+        overflow: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .tabs_container {
+        width: 100%;
+        min-width: 0;
+        height: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: stretch;
+        overflow: visible;
+    }
+
+    .tabs_container > .tab_menu,
+    .tabs_container > .tab_employees,
+    .tabs_container > .tab_grades,
+    .tabs_container > .tab_tables {
+        flex: 1 1 45%;
+        padding: 12px 14px;
+        font-size: 98%;
+        border-bottom: 1px solid rgb(198, 198, 198);
+        border-right: 1px solid rgb(198, 198, 198);
+    }
+
+    .user_bar {
+        margin-top: 0;
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+    }
+
+    .user_links {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .config_menu,
+    .config_employees,
+    .config_grades,
+    .config_tables {
+        width: 100%;
+        height: auto;
+        min-height: 60vh;
+        overflow: visible;
+    }
+
+    .menu,
+    .employees,
+    .grades,
+    .floors_container {
+        overflow-x: auto;
+    }
+
+    .floors_container {
+        max-height: none;
+    }
+
+    .tables_toolbar {
+        flex-direction: column;
+    }
+
+    .toolbar_box {
+        flex: 1 1 100%;
+    }
+
+    #config_toasts {
+        right: 12px;
+        left: 12px;
+        bottom: 12px;
+        align-items: stretch;
+    }
+
+    #config_toasts .toast {
+        max-width: none;
+    }
+}
+
+@media (max-width: 560px) {
+    .tabs_container > .tab_menu,
+    .tabs_container > .tab_employees,
+    .tabs_container > .tab_grades,
+    .tabs_container > .tab_tables {
+        flex: 1 1 100%;
+    }
+
+    .floor_tables {
+        grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+    }
+
+    .menu,
+    .employees,
+    .grades,
+    .floors_container,
+    .tables_toolbar {
+        padding: 10px;
+    }
+}
+
+
+/* ---- Ustawienia restauracji (ukryte domyslnie, pokazywane po kliknieciu zakladki Settings) ---- */
+.config_settings {
+    background-color: rgb(235, 235, 235);
+    padding: 18px;
+    border-top: 1px solid rgb(190, 190, 190);
+    overflow: auto;
+    display: none;
+}
+.config_settings.is-active {
+    display: block;
+}
+
+.settings {
+    max-width: 560px;
+}
+
+.settings h2 {
+    margin: 0 0 14px 0;
+    font-size: 120%;
+    color: rgb(50, 50, 50);
+}
+
+.settings label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 700;
+    font-size: 92%;
+    color: rgb(60, 60, 60);
+}
+
+.settings input[type="text"],
+.settings input[type="file"] {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid rgb(180, 180, 180);
+    border-radius: 6px;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+    background-color: white;
+}
+
+.settings input[type="file"] {
+    padding: 6px 8px;
+    cursor: pointer;
+}
+
+.settings input[type="file"]::file-selector-button {
+    background-color: rgb(46, 125, 50);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin-right: 10px;
+    font-weight: 700;
+    font-size: 92%;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.settings input[type="file"]::file-selector-button:hover {
+    background-color: rgb(38, 102, 41);
+}
+
+.btn_setting_save {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgb(46, 125, 50);
+    color: white;
+    font-weight: 700;
+    font-size: 95%;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.btn_setting_save:hover {
+    background-color: rgb(38, 102, 41);
+}
+
+.settings_logo_preview {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px dashed rgb(180, 180, 180);
+    border-radius: 8px;
+    text-align: center;
+    background-color: rgb(245, 245, 245);
+}
+
+.logo_preview {
+    max-width: 120px;
+    max-height: 120px;
+    border-radius: 6px;
+    display: block;
+    margin: 0 auto 8px auto;
+}
+
+.logo_hint {
+    font-size: 86%;
+    color: rgb(90, 90, 90);
+    margin: 6px 0 0 0;
+}
+
+
+/* ---- Linki nawigacyjne w user_bar (brakowało definicji) ---- */
+.btn_nav {
+    background-color: rgb(80, 80, 80);
+    color: white;
+    padding: 7px 12px;
+    border-radius: 7px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 85%;
+    white-space: nowrap;
+    display: inline-block;
+    margin: 2px 0;
+}
+
+.btn_nav:hover {
+    background-color: rgb(105, 105, 105);
+}
+
+.btn_nav.logout {
+    background-color: rgb(150, 40, 40);
+}
+
+.btn_nav.logout:hover {
+    background-color: rgb(180, 50, 50);
+}
+
+.logo {
+    width: 46px;
+    height: 46px;
+    object-fit: contain;
+    display: inline-block;
+}
+
+.edit_toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background-color: rgb(232, 232, 232);
+    border-bottom: 1px solid rgb(200, 200, 200);
+}
+
+.btn_edit_mode,
+.btn_save_changes,
+.btn_cancel_changes,
+.btn_undo_redo {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 88%;
+}
+
+.btn_edit_mode {
+    background-color: rgb(70, 70, 70);
+    color: white;
+}
+
+.btn_edit_mode.active {
+    background-color: rgb(180, 100, 0);
+}
+
+.btn_edit_mode.need_attention {
+    outline: 3px solid rgb(230, 140, 0);
+    animation: edit_pulse 0.45s ease-in-out 4;
+}
+
+.btn_save_changes {
+    background-color: rgb(46, 125, 50);
+    color: white;
+}
+
+.btn_cancel_changes {
+    background-color: rgb(150, 40, 40);
+    color: white;
+}
+
+.btn_undo_redo {
+    background-color: rgb(210, 210, 210);
+    color: rgb(40, 40, 40);
+}
+
+.inline_edit {
+    width: 100%;
+    border: 1px solid rgba(80, 80, 80, 0.22);
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font: inherit;
+    font-weight: inherit;
+    color: inherit;
+    box-shadow: none;
+}
+
+.inline_edit:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.72);
+    border-color: rgba(60, 60, 60, 0.45);
+}
+
+.emp_grade_select:disabled {
+    appearance: none;
+    border: none;
+    background: transparent;
+    pointer-events: none;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    font-weight: 700;
+}
+
+.td_grades.editable_flag {
+    cursor: pointer;
+}
+
+.td_grades:not(.editable_flag) {
+    cursor: default;
+}
+
+.chairs_edit {
+    width: 64px;
+    text-align: center;
+}
+
+.floor_name .inline_edit {
+    width: min(240px, 50vw);
+}
+
+.table_card .inline_edit {
+    width: 72px;
+    text-align: center;
+    color: rgb(30, 30, 30);
+}
+
+@keyframes edit_pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+}

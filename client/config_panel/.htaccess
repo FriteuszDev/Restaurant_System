@@ -1,0 +1,40 @@
+# ============================================================
+#  Panel konfiguracyjny - blokada dostepu do skryptow i danych.
+#  Uwaga: panel musi byc wykonywany przez Apache (config_panel.php),
+#  wiec blokujemy wylacznie wrazliwe rozszerzenia i ukrywamy
+#  pliki zrodlowe (.bak, .orig, .head*, .part*, .last*, .mid*, .txt).
+# ============================================================
+
+Options -Indexes
+
+# Ukryj pliki zrodlowe/backupy przed dostepem przez WWW.
+<FilesMatch "(?i)\.(bak|orig|old|sql|sh|py|rb|log|txt|md|ini|conf)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "(?i)^(config_panel)\.(head|part|mid|tail|last).*">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# Serwuj statyczne zasoby panelu.
+<FilesMatch "(?i)\.(css|js|woff2?|ttf|eot|svg|png|jpe?g|gif|webp|ico)$">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</FilesMatch>

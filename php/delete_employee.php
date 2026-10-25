@@ -1,29 +1,23 @@
 <?php
-$host = 'localhost';
-$db = 'Restaurant_System';
-$user = 'root';
-$pass = '';
+require_once __DIR__ . '/auth.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+require_json_access('delete_employees');
 
-    $EmployeeIdToDelete = $_POST['emID'] ?? 'None';
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$EmployeeIdToDelete = $_POST['emID'] ?? 'None';
 
-        $sql = "DELETE FROM employees WHERE employee_id = :employee_id";
-        $stmt = $pdo->prepare($sql);
+try {
+    $pdo = db();
 
-        $stmt->execute([
-            'employee_id' => $EmployeeIdToDelete
-        ]);
+    $sql = "DELETE FROM employees WHERE employee_id = :employee_id";
+    $stmt = $pdo->prepare($sql);
 
-        echo "fired employee";
+    $stmt->execute([
+        'employee_id' => $EmployeeIdToDelete
+    ]);
 
-    } catch (PDOException $e) {
-        die("blad polaczenia " . $e->getMessage());
-    }
-
-    exit();
+    json_out(['success' => true, 'message' => 'Usunieto pracownika.']);
+} catch (PDOException $e) {
+    json_out(['success' => false, 'message' => 'Error deleting employee.'], 500);
 }
-?>
+
+exit();

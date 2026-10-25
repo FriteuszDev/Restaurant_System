@@ -1,29 +1,23 @@
 <?php
-$host = 'localhost';
-$db = 'Restaurant_System';
-$user = 'root';
-$pass = '';
+require_once __DIR__ . '/auth.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+require_json_access('delete_dishes');
 
-    $DishIdToDelete = $_POST['DishID'] ?? 'None';
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$DishIdToDelete = $_POST['DishID'] ?? 'None';
 
-        $sql = "DELETE FROM menu WHERE dish_id = :dish_id";
-        $stmt = $pdo->prepare($sql);
+try {
+    $pdo = db();
 
-        $stmt->execute([
-            'dish_id' => $DishIdToDelete
-        ]);
+    $sql = "DELETE FROM menu WHERE dish_id = :dish_id";
+    $stmt = $pdo->prepare($sql);
 
-        echo "deleted dish";
+    $stmt->execute([
+        'dish_id' => $DishIdToDelete
+    ]);
 
-    } catch (PDOException $e) {
-        die("blad polaczenia " . $e->getMessage());
-    }
-
-    exit();
+    json_out(['success' => true, 'message' => 'Usunieto danie.']);
+} catch (PDOException $e) {
+    json_out(['success' => false, 'message' => 'Error deleting dish.'], 500);
 }
-?>
+
+exit();

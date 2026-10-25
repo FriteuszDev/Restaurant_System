@@ -1,0 +1,174 @@
+html {
+    box-sizing: border-box;
+    font-size: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    width: 100vw;
+    background: linear-gradient(135deg, rgb(38, 38, 38) 0%, rgb(84, 84, 84) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    padding: 16px;
+    box-sizing: border-box;
+}
+
+.login_card {
+    background-color: rgb(240, 240, 240);
+    max-width: 420px;
+    width: 100%;
+    padding: 30px 24px;
+    border-radius: 12px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.login_logo {
+    width: 85px;
+    height: 85px;
+    object-fit: contain;
+    margin-bottom: 10px;
+}
+
+.login_title {
+    margin: 0 0 25px 0;
+    color: rgb(45, 45, 45);
+    font-size: 150%;
+}
+
+#login_form {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+#login_form label {
+    font-weight: 700;
+    color: rgb(60, 60, 60);
+    margin: 10px 0 5px 0;
+}
+
+#login_form input,
+#login_form select {
+    padding: 12px 14px;
+    border: 1px solid rgb(180, 180, 180);
+    border-radius: 6px;
+    font-size: 100%;
+    box-sizing: border-box;
+    background-color: white;
+    width: 100%;
+}
+
+#login_form input:focus,
+#login_form select:focus {
+    outline: 2px solid rgb(70, 130, 200);
+    border-color: transparent;
+}
+
+#login_button {
+    margin-top: 22px;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: rgb(46, 125, 50);
+    color: white;
+    font-weight: 900;
+    font-size: 105%;
+    cursor: pointer;
+    width: 100%;
+}
+
+#login_button:hover {
+    background-color: rgb(38, 102, 41);
+}
+
+#login_button:disabled {
+    background-color: rgb(150, 150, 150);
+    cursor: wait;
+}
+
+.login_message {
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    font-size: 95%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.login_message.error {
+    background-color: rgb(253, 226, 226);
+    color: rgb(160, 25, 25);
+    border: 1px solid rgb(240, 160, 160);
+}
+
+.login_message.info {
+    background-color: rgb(226, 240, 253);
+    color: rgb(25, 70, 160);
+    border: 1px solid rgb(160, 195, 240);
+}
+
+.logout_link {
+    display: inline-block;
+    margin-top: 10px;
+    color: rgb(160, 25, 25);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+        align-items: stretch;
+        justify-content: center;
+    }
+
+    .login_card {
+        padding: 24px 20px;
+        border-radius: 10px;
+    }
+
+    .login_title {
+        font-size: 130%;
+        margin-bottom: 20px;
+    }
+
+    #login_form label {
+        font-size: 90%;
+        margin: 8px 0 4px 0;
+    }
+
+    #login_form input,
+    #login_form select {
+        padding: 10px 12px;
+        font-size: 95%;
+    }
+
+    #login_button {
+        padding: 14px;
+        font-size: 100%;
+    }
+
+    .login_message {
+        font-size: 90%;
+        padding: 8px 10px;
+    }
+}
+
+@media (max-width: 360px) {
+    .login_card {
+        padding: 20px 16px;
+    }
+
+    .login_title {
+        font-size: 120%;
+    }
+}
