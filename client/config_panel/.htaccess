@@ -1,8 +1,5 @@
 # ============================================================
 #  Panel konfiguracyjny - blokada dostepu do skryptow i danych.
-#  Uwaga: panel musi byc wykonywany przez Apache (config_panel.php),
-#  wiec blokujemy wylacznie wrazliwe rozszerzenia i ukrywamy
-#  pliki zrodlowe (.bak, .orig, .head*, .part*, .last*, .mid*, .txt).
 # ============================================================
 
 Options -Indexes
