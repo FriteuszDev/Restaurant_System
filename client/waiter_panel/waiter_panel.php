@@ -167,7 +167,7 @@ $logo_src = logo_url();
         window.CAN = <?php echo json_encode($can, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
     </script>
     </div>
-    <script src="waiter_panel.js"></script>
+    <script src="waiter_panel.js?v=14"></script>
 </body>
 </html>
 

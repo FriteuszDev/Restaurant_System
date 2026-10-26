@@ -1,0 +1,118 @@
+diff --git a/client/waiter_panel/waiter_panel.js b/client/waiter_panel/waiter_panel.js
+index c392c38..584eeb0 100644
+--- a/client/waiter_panel/waiter_panel.js
++++ b/client/waiter_panel/waiter_panel.js
+@@ -29,7 +29,11 @@ function toast(message, isError = false) {
+     }, 4500);
+ }
+ 
++window.addEventListener('error', (event) => {
++    toast('JS Error: ' + event.message, true);
++});
+ function postForm(endpoint, data) {
++
+     const formData = new FormData();
+ 
+     for (const key in data) {
+@@ -94,7 +98,7 @@ function itemsForSession(sessionId) {
+ }
+ 
+ function statusLabel(status) {
+-    if (status === 'occupied') return 'Occupied';
++    if (status === 'open' || status === 'occupied') return 'Occupied';
+     if (status === 'to_pay') return 'To pay';
+     return 'Free';
+ }
+@@ -155,6 +159,8 @@ function renderSidebar() {
+             const card = document.createElement('div');
+             card.className = 'table_card status_' + status + (state.openTableId === table.table_id ? ' selected' : '');
+             card.dataset.tableId = String(table.table_id);
++            card.style.cursor = 'pointer';
++            card.setAttribute('onclick', 'openTable(' + table.table_id + ')');
+ 
+             const number = document.createElement('div');
+             number.className = 'table_card_number';
+@@ -172,6 +178,7 @@ function renderSidebar() {
+             badge.textContent = statusLabel(status);
+ 
+             card.append(number, chairs, badge);
++
+             tablesBox.appendChild(card);
+         });
+ 
+@@ -201,7 +208,9 @@ function closeTableView() {
+     state.cart = [];
+ 
+     tableView.classList.add('hidden');
++    tableView.style.display = 'none';
+     emptyHint.classList.remove('hidden');
++    emptyHint.style.display = 'flex';
+     renderSidebar();
+ }
+ 
+@@ -396,7 +405,9 @@ function renderTableView(rebuildCart = false) {
+     const table = session.table;
+ 
+     emptyHint.classList.add('hidden');
++    emptyHint.style.display = 'none';
+     tableView.classList.remove('hidden');
++    tableView.style.display = 'flex';
+ 
+     document.getElementById('tv_table_number').textContent = '#' + table.table_number;
+     document.getElementById('tv_floor_name').textContent = table.floor_name;
+@@ -413,14 +424,20 @@ function renderTableView(rebuildCart = false) {
+ 
+     if (session.status === 'open') {
+         menuPanel.classList.remove('hidden');
++        menuPanel.style.display = 'flex';
+         closeTableFooter.classList.remove('hidden');
++        closeTableFooter.style.display = 'flex';
+         toPayPanel.classList.add('hidden');
++        toPayPanel.style.display = 'none';
+ 
+         if (rebuildCart) renderCart();
+     } else {
+         menuPanel.classList.add('hidden');
++        menuPanel.style.display = 'none';
+         closeTableFooter.classList.add('hidden');
++        closeTableFooter.style.display = 'none';
+         toPayPanel.classList.remove('hidden');
++        toPayPanel.style.display = 'flex';
+         renderToPayPanel();
+     }
+ 
+@@ -470,7 +487,15 @@ function renderToPayPanel() {
+ ///////////////////////////////////////////////////////////////
+ // Akcje: otwieranie stolika, koszyk, wysylanie zamowien
+ 
++let lastOpenAttempt = { tableId: null, time: 0 };
++
+ async function openTable(tableId) {
++    const now = Date.now();
++    if (lastOpenAttempt.tableId === Number(tableId) && now - lastOpenAttempt.time < 1500) {
++        return;
++    }
++    lastOpenAttempt = { tableId: Number(tableId), time: now };
++
+     try {
+         const opened = await postForm('open_table.php', { table_id: tableId });
+         const view = await postForm('get_session_view.php', { session_id: opened.session_id });
+@@ -509,10 +534,14 @@ async function refreshOpenTable() {
+ }
+ 
+ document.getElementById('floors_container').addEventListener('click', (event) => {
+-    const card = event.target.closest('.table_card');
+-    if (!card) return;
+-
+-    openTable(card.dataset.tableId);
++    let target = event.target;
++    while (target && target !== document) {
++        if (target.classList && target.classList.contains('table_card')) {
++            openTable(target.dataset.tableId);
++            return;
++        }
++        target = target.parentNode;
++    }
+ });
+ 
+ document.getElementById('btn_close_view').addEventListener('click', () => {

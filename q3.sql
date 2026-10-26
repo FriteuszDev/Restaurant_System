@@ -1,0 +1,1 @@
+USE restaurant_system; SELECT oi.item_status, COUNT(*) c FROM order_items oi GROUP BY oi.item_status; SELECT COUNT(*) total_tables FROM restaurant_tables; SELECT COUNT(*) total_sessions FROM table_sessions;  
