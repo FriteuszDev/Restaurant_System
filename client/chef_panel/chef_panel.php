@@ -37,6 +37,7 @@ $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
             </div>
 
             <div class="topbar_right">
+                <button id="btn_kitchen_history" class="btn_nav" type="button"><i class="fa-solid fa-clock-rotate-left"></i> Kitchen History</button>
                 <span class="auto_refresh"><i class="fa-solid fa-rotate"></i> Auto-refresh</span>
                 <?php if ($can['waiter_access']): ?>
                 <a class="btn_nav" href="../waiter_panel/waiter_panel.php"><i class="fa-solid fa-bell-concierge"></i> Waiter</a>
@@ -53,7 +54,7 @@ $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
                 <div class="queue_column column_cook">
                     <div class="column_header">
                         <i class="fa-solid fa-fire-burner"></i>
-                        <span>Do zrobienia</span>
+                        <span>To prepare</span>
                         <span id="cook_counter" class="column_counter">0</span>
                     </div>
                     <div id="queue_cook" class="queue"></div>
@@ -62,7 +63,7 @@ $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
                 <div class="queue_column column_ready">
                     <div class="column_header">
                         <i class="fa-solid fa-bell"></i>
-                        <span>Gotowe do odbioru</span>
+                        <span>Ready for pickup</span>
                         <span id="ready_counter" class="column_counter">0</span>
                     </div>
                     <div id="queue_ready" class="queue"></div>
@@ -71,6 +72,16 @@ $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
         </div>
 
         <div id="chef_toasts"></div>
+
+        <div id="kitchen_history_modal" class="modal hidden">
+            <div class="modal_box wide">
+                <h3><i class="fa-solid fa-clock-rotate-left"></i> Kitchen History</h3>
+                <div id="kitchen_history_list" class="history_list"></div>
+                <div class="summary_actions">
+                    <button id="btn_kitchen_history_close" class="btn_secondary" type="button">Close</button>
+                </div>
+            </div>
+        </div>
 
         <script src="chef_panel.js"></script>
     </div>

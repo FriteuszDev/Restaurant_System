@@ -123,13 +123,14 @@ $logo_src = logo_url();
             </div>
 
             <div id="table_view_footer" class="table_view_footer">
+                <button id="btn_free_table" class="btn_secondary" type="button"><i class="fa-solid fa-user-slash"></i> Free table</button>
                 <button id="btn_close_table" class="btn_warning" type="button">Summary and close table</button>
             </div>
 
             <div id="to_pay_panel" class="to_pay_panel hidden">
                 <h3><i class="fa-solid fa-cash-register"></i> Bill waiting for payment</h3>
                 <div id="to_pay_list" class="summary_list"></div>
-                <div class="summary_total">Total: <b id="to_pay_total">0.00</b> zł</div>
+                <div class="summary_total">Total: <b id="to_pay_total">0.00</b> PLN</div>
                 <div class="summary_actions">
                     <button id="btn_pay_now" class="btn_primary" type="button"><i class="fa-solid fa-check"></i> Paid - free table</button>
                     <button id="btn_skip_pay" class="btn_secondary" type="button">Skip - will do later</button>
@@ -142,7 +143,7 @@ $logo_src = logo_url();
         <div class="modal_box">
             <h3><i class="fa-solid fa-cash-register"></i> Table summary <span id="sm_table"></span></h3>
             <div id="sm_list" class="summary_list"></div>
-            <div class="summary_total">Razem: <b id="sm_total">0.00</b> zł</div>
+            <div class="summary_total">Total: <b id="sm_total">0.00</b> PLN</div>
             <div class="summary_actions">
                 <button id="btn_modal_pay" class="btn_primary" type="button"><i class="fa-solid fa-check"></i> Paid</button>
                 <button id="btn_modal_skip" class="btn_secondary" type="button">Skip (pay later)</button>

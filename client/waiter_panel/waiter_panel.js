@@ -155,9 +155,9 @@ function tableStatusColorClass(status) {
 }
 
 function tableStatusLabel(status) {
-    if (status === 'busy') return 'Zajęty';
-    if (status === 'waiting') return 'Czeka';
-    return 'Wolny';
+    if (status === 'busy') return 'Busy';
+    if (status === 'waiting') return 'Waiting';
+    return 'Free';
 }
 
 function renderSidebar() {
@@ -190,7 +190,7 @@ function renderSidebar() {
         if (!floor.tables.length) {
             const none = document.createElement('div');
             none.className = 'floors_empty';
-            none.textContent = 'Brak stolików na tym piętrze.';
+            none.textContent = 'No tables on this floor.';
             tablesBox.appendChild(none);
         }
 
@@ -244,6 +244,7 @@ const menuList = document.getElementById('menu_list');
 const cartList = document.getElementById('cart_list');
 const sendOrderButton = document.getElementById('btn_send_order');
 const closeTableFooter = document.getElementById('table_view_footer');
+const freeTableButton = document.getElementById('btn_free_table');
 const toPayPanel = document.getElementById('to_pay_panel');
 
 function closeTableView() {
@@ -266,7 +267,7 @@ function renderOrders() {
     if (!state.openOrders.length) {
         const empty = document.createElement('div');
         empty.className = 'orders_empty';
-        empty.textContent = 'Brak zamówień - dodaj dania z menu obok.';
+        empty.textContent = 'No orders - add dishes from the menu.';
         ordersList.appendChild(empty);
         return;
     }
@@ -277,7 +278,7 @@ function renderOrders() {
 
         const orderHeader = document.createElement('div');
         orderHeader.className = 'order_header';
-        orderHeader.textContent = 'Zamówienie #' + order.order_id + ' (' + order.created_at + ')';
+        orderHeader.textContent = 'Order #' + order.order_id + ' (' + order.created_at + ')';
         orderBox.appendChild(orderHeader);
 
         order.items.forEach((item) => {
@@ -336,7 +337,7 @@ function renderCart() {
     if (!state.cart.length) {
         const empty = document.createElement('div');
         empty.className = 'orders_empty';
-        empty.textContent = 'Koszyk jest pusty - kliknij danie w menu.';
+        empty.textContent = 'Cart is empty - click a dish in the menu.';
         cartList.appendChild(empty);
         sendOrderButton.disabled = true;
         return;
@@ -359,17 +360,17 @@ function renderCart() {
 
         const name = document.createElement('span');
         name.className = 'cart_name';
-        name.textContent = dish ? dish.dish_name : ('Danie #' + line.dish_id);
+        name.textContent = dish ? dish.dish_name : ('Dish #' + line.dish_id);
         top.appendChild(name);
 
         const price = document.createElement('span');
         price.className = 'cart_price';
-        price.textContent = lineTotal.toFixed(2) + ' zł';
+        price.textContent = lineTotal.toFixed(2) + ' PLN';
         top.appendChild(price);
 
         const remove = document.createElement('i');
         remove.className = 'fa-solid fa-circle-xmark cart_remove';
-        remove.title = 'Usuń z koszyka';
+        remove.title = 'Remove from cart';
         remove.dataset.index = String(index);
         top.appendChild(remove);
 
@@ -413,7 +414,7 @@ function renderCart() {
 
     const totalBox = document.createElement('div');
     totalBox.className = 'cart_total';
-    totalBox.textContent = 'Wartość koszyka: ' + total.toFixed(2) + ' zł';
+    totalBox.textContent = 'Cart value: ' + total.toFixed(2) + ' PLN';
     cartList.appendChild(totalBox);
 }
 
@@ -439,7 +440,7 @@ function renderMenu() {
 
         const price = document.createElement('span');
         price.className = 'menu_dish_price';
-        price.textContent = Number(dish.dish_price).toFixed(2) + ' zł';
+        price.textContent = Number(dish.dish_price).toFixed(2) + ' PLN';
 
         const add = document.createElement('i');
         add.className = 'fa-solid fa-plus menu_dish_add';
@@ -468,7 +469,7 @@ function renderTableView(rebuildCart = false) {
     document.getElementById('tv_floor_name').textContent = table.floor_name;
     document.getElementById('tv_chairs_count').textContent = String(table.chairs);
     document.getElementById('tv_total').textContent = state.openSummary
-        ? ('(' + Number(state.openSummary.total).toFixed(2) + ' zł)')
+        ? ('(' + Number(state.openSummary.total).toFixed(2) + ' PLN)')
         : '';
 
     const statusBadge = document.getElementById('tv_status');
@@ -527,7 +528,7 @@ function renderSummaryLines(container, summaryOrders) {
     if (!any) {
         const empty = document.createElement('div');
         empty.className = 'orders_empty';
-        empty.textContent = 'Brak pozycji.';
+        empty.textContent = 'No items.';
         container.appendChild(empty);
     }
 }
@@ -563,8 +564,10 @@ async function openTable(tableId) {
             state.openOrders = view.orders;
             state.openSummary = view.summary;
         } else {
+            // Natychmiast otwieramy stolik w bazie - staje sie zajety (pomaranczowy)
+            const opened = await postForm('open_table.php', { table_id: Number(tableId) });
             state.openSession = {
-                session_id: null,
+                session_id: opened.session_id,
                 status: 'open',
                 table: {
                     table_number: found.table.table_number,
@@ -577,6 +580,7 @@ async function openTable(tableId) {
         }
 
         renderTableView(true);
+        await pollUpdates(false);
     } catch (error) {
         toast(error.message, true);
     }
@@ -596,7 +600,7 @@ async function refreshOpenTable() {
         renderTableView(false);
 
         if (previousStatus === 'open' && view.session.status === 'to_pay') {
-            toast('Stolik został zamknięty przez innego kelnera - czeka na opłacenie.');
+            toast('Table closed by another waiter - waiting for payment.');
         }
     } catch (error) {
         toast(error.message, true);
@@ -697,6 +701,21 @@ sendOrderButton.addEventListener('click', async () => {
     }
 });
 
+freeTableButton.addEventListener('click', async () => {
+    if (!state.openSession || !state.openSession.session_id) return;
+
+    if (!confirm('Are you sure you want to free this table without payment? All orders will be deleted.')) return;
+
+    try {
+        const payload = await postForm('free_table.php', { session_id: state.openSession.session_id });
+        toast(payload.message);
+        closeTableView();
+        await pollUpdates(false);
+    } catch (error) {
+        toast(error.message, true);
+    }
+});
+
 ordersList.addEventListener('click', async (event) => {
     const serveBtn = event.target.closest('.btn_serve');
     if (!serveBtn) return;
@@ -735,7 +754,7 @@ document.getElementById('btn_close_table').addEventListener('click', async () =>
         });
 
         if (payload.cancelled) {
-            toast('Pusty stolik został zwolniony.');
+            toast('Empty table has been freed.');
             closeTableView();
             await pollUpdates(false);
             return;
@@ -772,7 +791,7 @@ document.getElementById('btn_close_table').addEventListener('click', async () =>
         if (!any) {
             const empty = document.createElement('div');
             empty.className = 'orders_empty';
-            empty.textContent = 'Brak pozycji.';
+            empty.textContent = 'No items.';
             list.appendChild(empty);
         }
 
@@ -790,7 +809,7 @@ async function payCurrentSession(sessionId, sessionLabel) {
         const payload = await postForm('pay_session.php', { session_id: sessionId });
 
         summaryModal.classList.add('hidden');
-        toast('Opłacono stolik ' + sessionLabel + ': ' + Number(payload.summary.total).toFixed(2) + ' zł');
+        toast('Paid table ' + sessionLabel + ': ' + Number(payload.summary.total).toFixed(2) + ' PLN');
 
         closeTableView();
         await pollUpdates(false);
@@ -806,7 +825,7 @@ document.getElementById('btn_modal_pay').addEventListener('click', () => {
 
 document.getElementById('btn_modal_skip').addEventListener('click', () => {
     summaryModal.classList.add('hidden');
-    toast('Płatność odłożona - stolik czeka na opłatę (kolor pomarańczowy).');
+    toast('Payment postponed - table waiting for payment (orange).');
     renderTableView(false);
 });
 
@@ -816,7 +835,7 @@ document.getElementById('btn_pay_now').addEventListener('click', () => {
 });
 
 document.getElementById('btn_skip_pay').addEventListener('click', () => {
-    toast('Płatność odłożona - wróć do tego stolika później.');
+    toast('Payment postponed - return to this table later.');
     closeTableView();
     pollUpdates(false);
 });
@@ -828,7 +847,7 @@ const historyList = document.getElementById('history_list');
 
 document.getElementById('btn_history').addEventListener('click', async () => {
     historyModal.classList.remove('hidden');
-    historyList.textContent = 'Ładowanie historii...';
+    historyList.textContent = 'Loading history...';
 
     try {
         const payload = await getJson('get_history.php');

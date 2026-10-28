@@ -7,15 +7,15 @@ $session_id = (int) ($_POST['session_id'] ?? 0);
 $items = json_decode($_POST['items'] ?? '', true);
 
 if ($session_id <= 0) {
-    json_out(['success' => false, 'message' => 'Nieprawidlowe ID sesji stolika.'], 400);
+    json_out(['success' => false, 'message' => 'Invalid table session ID.'], 400);
 }
 
 if (!is_array($items) || count($items) === 0) {
-    json_out(['success' => false, 'message' => 'Brak pozycji zamowienia.'], 400);
+    json_out(['success' => false, 'message' => 'No order items.'], 400);
 }
 
 if (count($items) > 50) {
-    json_out(['success' => false, 'message' => 'Za duzo pozycji w jednym zamowieniu (max 50).'], 400);
+    json_out(['success' => false, 'message' => 'Too many items in one order (max 50).'], 400);
 }
 
 $stmt = db()->prepare("SELECT session_id, status FROM table_sessions WHERE session_id = :session_id");
@@ -23,11 +23,11 @@ $stmt->execute([':session_id' => $session_id]);
 $session = $stmt->fetch();
 
 if (!$session) {
-    json_out(['success' => false, 'message' => 'Nie znaleziono sesji stolika.'], 404);
+    json_out(['success' => false, 'message' => 'Table session not found.'], 404);
 }
 
 if ($session['status'] !== 'open') {
-    json_out(['success' => false, 'message' => 'Do tego stolika nie mozna juz dodawac zamowien (oczekuje na plate).'], 409);
+    json_out(['success' => false, 'message' => 'Cannot add more orders to this table (waiting for payment).'], 409);
 }
 
 $dish_ids = [];
@@ -37,7 +37,7 @@ foreach ($items as $item) {
     $note = trim((string) ($item['note'] ?? ''));
 
     if ($dish_id <= 0 || $quantity < 1 || $quantity > 99 || mb_strlen($note) > 255) {
-        json_out(['success' => false, 'message' => 'Nieprawidlowa pozycja zamowienia.'], 400);
+        json_out(['success' => false, 'message' => 'Invalid order item.'], 400);
     }
 
     $dish_ids[] = $dish_id;
@@ -56,7 +56,7 @@ while ($row = $stmt->fetch()) {
 
 foreach ($dish_ids as $dish_id) {
     if (!isset($dishes[$dish_id])) {
-        json_out(['success' => false, 'message' => 'Jedno z wybranych dan nie istnieje juz w menu.'], 409);
+        json_out(['success' => false, 'message' => 'One of the selected dishes no longer exists in the menu.'], 409);
     }
 }
 
@@ -107,12 +107,12 @@ try {
     $pdo->commit();
 } catch (Exception $e) {
     $pdo->rollBack();
-    json_out(['success' => false, 'message' => 'Blad zapisu zamowienia.'], 500);
+    json_out(['success' => false, 'message' => 'Error saving order.'], 500);
 }
 
 json_out([
     'success' => true,
-    'message' => 'Wyslano zamowienie do kuchni.',
+    'message' => 'Order sent to kitchen.',
     'order_id' => $order_id,
     'items' => $created,
 ]);

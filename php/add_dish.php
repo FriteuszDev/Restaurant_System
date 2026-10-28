@@ -16,7 +16,7 @@ if (mb_strlen($desc) > 500) {
 }
 
 if (!is_numeric($price) || (float) $price < 0) {
-    json_out(['success' => false, 'message' => 'Cena musi byc liczba nieujemna.'], 400);
+    json_out(['success' => false, 'message' => 'Price must be a non-negative number.'], 400);
 }
 
 
@@ -26,17 +26,17 @@ if (isset($_FILES['image']) && is_array($_FILES['image']) && (int) ($_FILES['ima
     $upload = $_FILES['image'];
 
     if ($upload['error'] !== UPLOAD_ERR_OK) {
-        json_out(['success' => false, 'message' => 'Blad wyslania pliku (kod ' . (int) $upload['error'] . ').'], 400);
+        json_out(['success' => false, 'message' => 'File upload error (code ' . (int) $upload['error'] . ').'], 400);
     }
 
     if (!is_uploaded_file($upload['tmp_name'])) {
-        json_out(['success' => false, 'message' => 'Nieprawidlowy plik wysylany.'], 400);
+        json_out(['success' => false, 'message' => 'Invalid file uploaded.'], 400);
     }
 
     // Limit rozmiaru pliku (5 MB).
     $maxBytes = 5 * 1024 * 1024;
     if ((int) $upload['size'] <= 0 || (int) $upload['size'] > $maxBytes) {
-        json_out(['success' => false, 'message' => 'Plik jest pusty lub przekracza limit 5 MB.'], 400);
+        json_out(['success' => false, 'message' => 'File is empty or exceeds the 5 MB limit.'], 400);
     }
 
     $originalName = (string) $upload['name'];
@@ -44,7 +44,7 @@ if (isset($_FILES['image']) && is_array($_FILES['image']) && (int) ($_FILES['ima
     // 1) Rozszerzenie: dozwolone wylacznie .png
     $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
     if ($extension !== 'png') {
-        json_out(['success' => false, 'message' => 'Dozwolony format obrazka to tylko PNG.'], 400);
+        json_out(['success' => false, 'message' => 'Only PNG image format is allowed.'], 400);
     }
 
     // 1a) Odrzucamy podwojne rozszerzenia z rozszerzeniem wykonywalnym (np. shell.php.png),
@@ -60,7 +60,7 @@ if (isset($_FILES['image']) && is_array($_FILES['image']) && (int) ($_FILES['ima
 
     foreach ($nameParts as $part) {
         if (in_array(strtolower($part), $dangerous, true)) {
-            json_out(['success' => false, 'message' => 'Nazwa pliku zawiera niedozwolone rozszerzenie.'], 400);
+            json_out(['success' => false, 'message' => 'File name contains a disallowed extension.'], 400);
         }
     }
 
@@ -75,25 +75,25 @@ if (isset($_FILES['image']) && is_array($_FILES['image']) && (int) ($_FILES['ima
     }
 
     if ($mime !== '' && $mime !== 'image/png') {
-        json_out(['success' => false, 'message' => 'Wyslany plik nie jest obrazkiem PNG.'], 400);
+        json_out(['success' => false, 'message' => 'Uploaded file is not a PNG image.'], 400);
     }
 
     // 3) Sygnatura PNG w zawartosci pliku (8 bajtow: \x89PNG\r\n\x1a\n)
     $handle = fopen($upload['tmp_name'], 'rb');
     if ($handle === false) {
-        json_out(['success' => false, 'message' => 'Nie mozna odczytac przeslanego pliku.'], 500);
+        json_out(['success' => false, 'message' => 'Cannot read the uploaded file.'], 500);
     }
     $signature = fread($handle, 8);
     fclose($handle);
 
     if ($signature !== "\x89PNG\r\n\x1a\n") {
-        json_out(['success' => false, 'message' => 'Wyslany plik nie jest obrazkiem PNG.'], 400);
+        json_out(['success' => false, 'message' => 'Uploaded file is not a PNG image.'], 400);
     }
 
     // 4) Plik musi byc poprawnym obrazem odczytywalnym przez GD/getimagesize
     $imageInfo = @getimagesize($upload['tmp_name']);
     if ($imageInfo === false || ($imageInfo[2] ?? 0) !== IMAGETYPE_PNG) {
-        json_out(['success' => false, 'message' => 'Wyslany plik nie jest poprawnym obrazem PNG.'], 400);
+        json_out(['success' => false, 'message' => 'Uploaded file is not a valid PNG image.'], 400);
     }
 
     // 5) Generowana, bezpieczna nazwa pliku (bez danych z oryginalnej nazwy)
@@ -103,7 +103,7 @@ if (isset($_FILES['image']) && is_array($_FILES['image']) && (int) ($_FILES['ima
     $SaveIn = $SaveInFolder . $FileName;
 
     if (!move_uploaded_file($upload['tmp_name'], $SaveIn)) {
-        json_out(['success' => false, 'message' => 'Nie mozna zapisac obrazka.'], 500);
+        json_out(['success' => false, 'message' => 'Cannot save image.'], 500);
     }
 
     $SavedPath = $SaveIn;
@@ -129,7 +129,7 @@ try {
     ];
 
     if (is_ajax_request()) {
-        json_out(['success' => true, 'message' => 'Dodano danie.', 'dish' => $dish]);
+        json_out(['success' => true, 'message' => 'Dish added.', 'dish' => $dish]);
     }
 
     echo "added dish";
@@ -140,10 +140,10 @@ try {
     }
 
     if (is_ajax_request()) {
-        json_out(['success' => false, 'message' => 'Blad zapisu dania.'], 500);
+        json_out(['success' => false, 'message' => 'Error saving dish.'], 500);
     }
 
-    die("blad polaczenia " . $e->getMessage());
+    die("connection error " . $e->getMessage());
 }
 
 header("Location: ../client/config_panel/config_panel.php");

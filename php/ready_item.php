@@ -18,7 +18,7 @@ if (!$item) {
 }
 
 if ($item['item_status'] === 'ready') {
-    json_out(['success' => false, 'message' => 'Ta pozycja jest juz oznaczona jako gotowa.'], 409);
+    json_out(['success' => false, 'message' => 'This item is already marked as ready.'], 409);
 }
 
 $stmt = db()->prepare(
@@ -31,6 +31,25 @@ $stmt->execute([
     ':employee_id' => $employee['employee_id'],
     ':item_id' => $item_id,
 ]);
+
+// Save to kitchen history
+$stmt2 = db()->prepare("SELECT dish_name, quantity FROM order_items WHERE item_id = :item_id");
+$stmt2->execute([':item_id' => $item_id]);
+$dish = $stmt2->fetch();
+
+if ($dish) {
+    $stmt3 = db()->prepare(
+        "INSERT INTO kitchen_history (order_item_id, dish_name, quantity, action_type, employee_id, employee_name)
+         VALUES (:item_id, :dish_name, :quantity, 'ready', :employee_id, :employee_name)"
+    );
+    $stmt3->execute([
+        ':item_id' => $item_id,
+        ':dish_name' => $dish['dish_name'],
+        ':quantity' => (int) $dish['quantity'],
+        ':employee_id' => $employee['employee_id'],
+        ':employee_name' => employee_full_name($employee),
+    ]);
+}
 
 json_out([
     'success' => true,

@@ -6,7 +6,7 @@ $employee = require_json_access('chef_access');
 $item_id = (int) ($_POST['item_id'] ?? 0);
 
 if ($item_id <= 0) {
-    json_out(['success' => false, 'message' => 'Nieprawidlowe ID pozycji.'], 400);
+    json_out(['success' => false, 'message' => 'Invalid item ID.'], 400);
 }
 
 $stmt = db()->prepare(
@@ -18,18 +18,18 @@ $stmt->execute([':item_id' => $item_id]);
 $item = $stmt->fetch();
 
 if (!$item) {
-    json_out(['success' => false, 'message' => 'Nie znaleziono pozycji.'], 404);
+    json_out(['success' => false, 'message' => 'Item not found.'], 404);
 }
 
 if ($item['item_status'] === 'ready') {
-    json_out(['success' => false, 'message' => 'Ta pozycja jest juz gotowa.'], 409);
+    json_out(['success' => false, 'message' => 'This item is already ready.'], 409);
 }
 
 if ($item['item_status'] === 'claimed') {
     $claimer = employee_full_name_by_id((int) $item['claimed_by']);
     json_out([
         'success' => false,
-        'message' => 'Ta pozycja jest juz zajeta przez: ' . ($claimer ?? 'inny kucharz') . '.',
+        'message' => 'This item is already taken by: ' . ($claimer ?? 'another chef') . '.',
     ], 409);
 }
 
@@ -43,12 +43,31 @@ $stmt->execute([
 ]);
 
 if ($stmt->rowCount() === 0) {
-    json_out(['success' => false, 'message' => 'Ktos inny zdazyl zabrac tla pozycje.'], 409);
+    json_out(['success' => false, 'message' => 'Someone else already took this item.'], 409);
+}
+
+// Save to kitchen history
+$stmt2 = db()->prepare("SELECT dish_name, quantity FROM order_items WHERE item_id = :item_id");
+$stmt2->execute([':item_id' => $item_id]);
+$dish = $stmt2->fetch();
+
+if ($dish) {
+    $stmt3 = db()->prepare(
+        "INSERT INTO kitchen_history (order_item_id, dish_name, quantity, action_type, employee_id, employee_name)
+         VALUES (:item_id, :dish_name, :quantity, 'claim', :employee_id, :employee_name)"
+    );
+    $stmt3->execute([
+        ':item_id' => $item_id,
+        ':dish_name' => $dish['dish_name'],
+        ':quantity' => (int) $dish['quantity'],
+        ':employee_id' => $employee['employee_id'],
+        ':employee_name' => employee_full_name($employee),
+    ]);
 }
 
 json_out([
     'success' => true,
-    'message' => 'Zabales pozycje do roboty.',
+    'message' => 'Item taken to work.',
     'item_id' => $item_id,
     'claimed_by_name' => employee_full_name($employee),
 ]);

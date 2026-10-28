@@ -13,7 +13,7 @@ $stmt = db()->prepare("SELECT floor_id FROM floors WHERE floor_id = :floor_id");
 $stmt->execute([':floor_id' => $floor_id]);
 
 if (!$stmt->fetch()) {
-    json_out(['success' => false, 'message' => 'Nie znaleziono pietra.'], 404);
+    json_out(['success' => false, 'message' => 'Floor not found.'], 404);
 }
 
 $stmt = db()->prepare(
@@ -27,11 +27,11 @@ $stmt->execute([':floor_id' => $floor_id]);
 if ((int) $stmt->fetch()['active_count'] > 0) {
     json_out([
         'success' => false,
-        'message' => 'Nie mozna usunac pietra - na ktoryms stoliku trwa aktualne zamowienie lub czeka na plate.',
+        'message' => 'Cannot delete floor - an active order is in progress on one of its tables or waiting for payment.',
     ], 409);
 }
 
 $stmt = db()->prepare("DELETE FROM floors WHERE floor_id = :floor_id");
 $stmt->execute([':floor_id' => $floor_id]);
 
-json_out(['success' => true, 'message' => 'Usunieto pietro (razem ze stolikami i historia).']);
+json_out(['success' => true, 'message' => 'Floor deleted (with tables and history).']);

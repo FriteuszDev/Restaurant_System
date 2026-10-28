@@ -30,7 +30,7 @@ try {
     $grade_id = $stmt->fetchColumn();
 
     if (!$grade_id) {
-        json_out(['success' => false, 'message' => 'Nie znaleziono stanowiska.'], 404);
+        json_out(['success' => false, 'message' => 'Position not found.'], 404);
     }
 
     $sql2 = "INSERT INTO employees (employee_name, employee_surname, employee_password, grade_id) VALUES (:e_name, :e_surname, :e_password, :e_gradeid)";
@@ -51,16 +51,16 @@ try {
     ];
 
     if (is_ajax_request()) {
-        json_out(['success' => true, 'message' => 'Dodano pracownika.', 'employee' => $employee]);
+        json_out(['success' => true, 'message' => 'Employee added.', 'employee' => $employee]);
     }
 
     echo "added employee";
 } catch (PDOException $e) {
     if (is_ajax_request()) {
-        json_out(['success' => false, 'message' => 'Blad zapisu pracownika.'], 500);
+        json_out(['success' => false, 'message' => 'Error saving employee.'], 500);
     }
 
-    die("blad polaczenia " . $e->getMessage());
+    die("connection error " . $e->getMessage());
 }
 
 header("Location: ../client/config_panel/config_panel.php");

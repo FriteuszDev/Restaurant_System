@@ -15,7 +15,7 @@ try {
         'employee_id' => $EmployeeIdToDelete
     ]);
 
-    json_out(['success' => true, 'message' => 'Usunieto pracownika.']);
+    json_out(['success' => true, 'message' => 'Employee deleted.']);
 } catch (PDOException $e) {
     json_out(['success' => false, 'message' => 'Error deleting employee.'], 500);
 }

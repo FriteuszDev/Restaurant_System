@@ -1,0 +1,59 @@
+<?php
+require_once __DIR__ . '/auth.php';
+
+$employee = require_json_access('waiter_access');
+
+$session_id = (int) ($_POST['session_id'] ?? 0);
+
+if ($session_id <= 0) {
+    json_out(['success' => false, 'message' => 'Invalid table session ID.'], 400);
+}
+
+$stmt = db()->prepare("SELECT session_id, table_id, status FROM table_sessions WHERE session_id = :session_id");
+$stmt->execute([':session_id' => $session_id]);
+$session = $stmt->fetch();
+
+if (!$session) {
+    json_out(['success' => false, 'message' => 'Table session not found.'], 404);
+}
+
+if (!in_array($session['status'], ['open', 'to_pay'], true)) {
+    json_out(['success' => false, 'message' => 'This table session is already closed.'], 409);
+}
+
+$pdo = db();
+$pdo->beginTransaction();
+
+try {
+    // Usuwam powiazane pozycje zamowienia i zamowienia dla tej sesji
+    $stmt = $pdo->prepare("SELECT order_id FROM orders WHERE session_id = :session_id");
+    $stmt->execute([':session_id' => $session_id]);
+    $orderIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+    foreach ($orderIds as $orderId) {
+        $pdo->prepare("DELETE FROM order_items WHERE order_id = :order_id")
+            ->execute([':order_id' => $orderId]);
+    }
+
+    $pdo->prepare("DELETE FROM orders WHERE session_id = :session_id")
+        ->execute([':session_id' => $session_id]);
+
+    // Usuwam sesje stolika
+    $pdo->prepare("DELETE FROM table_sessions WHERE session_id = :session_id")
+        ->execute([':session_id' => $session_id]);
+
+    // Ustawiam stolik na wolny
+    $pdo->prepare("UPDATE restaurant_tables SET status = 'free' WHERE table_id = :table_id")
+        ->execute([':table_id' => $session['table_id']]);
+
+    $pdo->commit();
+} catch (Exception $e) {
+    $pdo->rollBack();
+    json_out(['success' => false, 'message' => 'Error freeing table.'], 500);
+}
+
+json_out([
+    'success' => true,
+    'message' => 'Table freed without payment.',
+    'table_id' => (int) $session['table_id'],
+]);

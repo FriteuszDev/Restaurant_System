@@ -15,7 +15,7 @@ try {
         'dish_id' => $DishIdToDelete
     ]);
 
-    json_out(['success' => true, 'message' => 'Usunieto danie.']);
+    json_out(['success' => true, 'message' => 'Dish deleted.']);
 } catch (PDOException $e) {
     json_out(['success' => false, 'message' => 'Error deleting dish.'], 500);
 }

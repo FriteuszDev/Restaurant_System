@@ -6,7 +6,7 @@ require_json_access('waiter_access');
 $session_id = (int) ($_POST['session_id'] ?? 0);
 
 if ($session_id <= 0) {
-    json_out(['success' => false, 'message' => 'Nieprawidlowe ID sesji stolika.'], 400);
+    json_out(['success' => false, 'message' => 'Invalid table session ID.'], 400);
 }
 
 $stmt = db()->prepare("SELECT session_id, table_id, status FROM table_sessions WHERE session_id = :session_id");
@@ -14,11 +14,11 @@ $stmt->execute([':session_id' => $session_id]);
 $session = $stmt->fetch();
 
 if (!$session) {
-    json_out(['success' => false, 'message' => 'Nie znaleziono sesji stolika.'], 404);
+    json_out(['success' => false, 'message' => 'Table session not found.'], 404);
 }
 
 if ($session['status'] !== 'open') {
-    json_out(['success' => false, 'message' => 'Ta sesja stolika jest juz zamknieta.'], 409);
+    json_out(['success' => false, 'message' => 'This table session is already closed.'], 409);
 }
 
 $stmt = db()->prepare(
@@ -45,12 +45,12 @@ if ((int) $summary['items_count'] === 0) {
         $pdo->commit();
     } catch (Exception $e) {
         $pdo->rollBack();
-        json_out(['success' => false, 'message' => 'Blad zamykania stolika.'], 500);
+        json_out(['success' => false, 'message' => 'Error closing table.'], 500);
     }
 
     json_out([
         'success' => true,
-        'message' => 'Pusty stolik zostal zwolniony.',
+        'message' => 'Empty table freed.',
         'cancelled' => true,
         'summary' => ['total' => '0.00', 'items_count' => 0],
     ]);
@@ -66,7 +66,7 @@ $stmt->execute([':table_id' => $session['table_id']]);
 
 json_out([
     'success' => true,
-    'message' => 'Zamknieto stolik - czeka na plate.',
+    'message' => 'Table closed - waiting for payment.',
     'cancelled' => false,
     'summary' => [
         'total' => $total,

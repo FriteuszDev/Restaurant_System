@@ -11,22 +11,22 @@ if ($chairs <= 0) {
 }
 
 if ($floor_id <= 0) {
-    json_out(['success' => false, 'message' => 'Wybierz pietro.'], 400);
+    json_out(['success' => false, 'message' => 'Select a floor.'], 400);
 }
 
 if ($table_number === '' || mb_strlen($table_number) > 10) {
-    json_out(['success' => false, 'message' => 'Numer stolika musi miec 1-10 znakow.'], 400);
+    json_out(['success' => false, 'message' => 'Table number must be 1-10 characters.'], 400);
 }
 
 if ($chairs < 1 || $chairs > 50) {
-    json_out(['success' => false, 'message' => 'Liczba krzesel musi byc z zakresu 1-50.'], 400);
+    json_out(['success' => false, 'message' => 'Number of chairs must be between 1 and 50.'], 400);
 }
 
 $stmt = db()->prepare("SELECT floor_id FROM floors WHERE floor_id = :floor_id");
 $stmt->execute([':floor_id' => $floor_id]);
 
 if (!$stmt->fetch()) {
-    json_out(['success' => false, 'message' => 'Nie znaleziono pietra.'], 404);
+    json_out(['success' => false, 'message' => 'Floor not found.'], 404);
 }
 
 $stmt = db()->prepare(
@@ -35,7 +35,7 @@ $stmt = db()->prepare(
 $stmt->execute([':floor_id' => $floor_id, ':table_number' => $table_number]);
 
 if ($stmt->fetch()) {
-    json_out(['success' => false, 'message' => 'Stolik o tym numerze juz istnieje na tym pietrze.'], 409);
+    json_out(['success' => false, 'message' => 'A table with this number already exists on this floor.'], 409);
 }
 
 $stmt = db()->prepare(
@@ -50,7 +50,7 @@ $stmt->execute([
 
 json_out([
     'success' => true,
-    'message' => 'Dodano stolik.',
+    'message' => 'Table added.',
     'table' => [
         'table_id' => (int) db()->lastInsertId(),
         'floor_id' => $floor_id,

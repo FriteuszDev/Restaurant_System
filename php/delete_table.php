@@ -26,7 +26,7 @@ $stmt->execute([':table_id' => $table_id]);
 if ((int) $stmt->fetch()['active_count'] > 0) {
     json_out([
         'success' => false,
-        'message' => 'Nie mozna usunac stolika - trwa na nim zamowienie lub czeka na plate.',
+        'message' => 'Cannot delete table - an order is in progress on it or waiting for payment.',
     ], 409);
 }
 

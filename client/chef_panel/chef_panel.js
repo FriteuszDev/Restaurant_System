@@ -4,6 +4,10 @@ const cookElement = document.getElementById('queue_cook');
 const readyElement = document.getElementById('queue_ready');
 const cookCounter = document.getElementById('cook_counter');
 const readyCounter = document.getElementById('ready_counter');
+const kitchenHistoryModal = document.getElementById('kitchen_history_modal');
+const kitchenHistoryList = document.getElementById('kitchen_history_list');
+const btnKitchenHistory = document.getElementById('btn_kitchen_history');
+const btnKitchenHistoryClose = document.getElementById('btn_kitchen_history_close');
 
 // no signature cache - always render to reflect DB state instantly
 
@@ -133,7 +137,7 @@ function buildItemCard(item, columnType) {
             claimButton.className = 'btn_claim';
             claimButton.dataset.action = 'claim';
             claimButton.dataset.itemId = String(item.item_id);
-            claimButton.innerHTML = '<i class="fa-solid fa-hand"></i> Biorę na siebie';
+            claimButton.innerHTML = '<i class="fa-solid fa-hand"></i> Claim';
             actions.appendChild(claimButton);
         }
 
@@ -162,9 +166,9 @@ function renderColumn(element, counter, items, columnType) {
         const empty = document.createElement('div');
         empty.className = 'queue_empty';
         if (columnType === 'cook') {
-            empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>Brak zamówień do przygotowania!';
+            empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>No orders to prepare!';
         } else {
-            empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>Brak dań gotowych do odbioru!';
+            empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>No dishes ready for pickup!';
         }
         element.appendChild(empty);
         return;
@@ -191,7 +195,7 @@ function renderColumn(element, counter, items, columnType) {
         const header = document.createElement('div');
         header.className = 'group_header';
         header.innerHTML = '<i class="fa-solid fa-table-cells"></i> ';
-        header.append('Stolik #' + group.table_number + ' (' + group.floor_name + ')');
+        header.append('Table #' + group.table_number + ' (' + group.floor_name + ')');
         box.appendChild(header);
 
         group.items.forEach((item) => {
@@ -236,4 +240,50 @@ document.getElementById('queue_split').addEventListener('click', async (event) =
 
 pollQueue(false);
 setInterval(() => pollQueue(false), 2000);
+
+async function loadKitchenHistory() {
+    try {
+        const payload = await getJson('get_kitchen_history.php');
+        renderKitchenHistory(payload.history || []);
+    } catch (error) {
+        toast(error.message, true);
+    }
+}
+
+function renderKitchenHistory(history) {
+    kitchenHistoryList.textContent = '';
+
+    if (!history.length) {
+        kitchenHistoryList.textContent = 'No kitchen activity yet.';
+        return;
+    }
+
+    history.forEach((entry) => {
+        const line = document.createElement('div');
+        line.className = 'history_entry';
+
+        const actionLabel = entry.action_type === 'claim' ? 'Claimed'
+            : entry.action_type === 'ready' ? 'Marked Ready'
+            : entry.action_type === 'serve' ? 'Served'
+            : entry.action_type;
+
+        const summary = document.createElement('summary');
+        summary.textContent =
+            entry.dish_name + ' x' + entry.quantity +
+            ' - ' + actionLabel +
+            ' by ' + (entry.employee_name || 'Unknown') +
+            ' at ' + entry.created_at;
+        line.appendChild(summary);
+        kitchenHistoryList.appendChild(line);
+    });
+}
+
+btnKitchenHistory.addEventListener('click', () => {
+    loadKitchenHistory();
+    kitchenHistoryModal.classList.remove('hidden');
+});
+
+btnKitchenHistoryClose.addEventListener('click', () => {
+    kitchenHistoryModal.classList.add('hidden');
+});
 

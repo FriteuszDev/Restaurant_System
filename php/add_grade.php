@@ -18,7 +18,7 @@ foreach ($requested_flags as $flag => $value) {
     if ($value === 1 && !can_grant_permission($current_employee, $flag)) {
         json_out([
             'success' => false,
-            'message' => 'Nie mozesz przyznac uprawnienia, ktorego sam nie posiadasz.',
+            'message' => 'You cannot grant a permission you do not have.',
         ], 403);
     }
 }
