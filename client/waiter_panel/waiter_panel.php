@@ -55,7 +55,7 @@ $logo_src = logo_url();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="<?php echo htmlspecialchars($logo_src) ?>">
     <title><?php echo htmlspecialchars($restaurant_name) ?> - Waiter Panel</title>
-    <link rel="stylesheet" href="waiter_panel.css">
+    <link rel="stylesheet" href="waiter_panel.css?v=2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -167,7 +167,7 @@ $logo_src = logo_url();
         window.CAN = <?php echo json_encode($can, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
     </script>
     </div>
-    <script src="waiter_panel.js?v=14"></script>
+    <script src="waiter_panel.js?v=15"></script>
 </body>
 </html>
 

@@ -160,7 +160,6 @@ function renderSidebar() {
             card.className = 'table_card status_' + status + (state.openTableId === table.table_id ? ' selected' : '');
             card.dataset.tableId = String(table.table_id);
             card.style.cursor = 'pointer';
-            card.setAttribute('onclick', 'openTable(' + table.table_id + ')');
 
             const number = document.createElement('div');
             number.className = 'table_card_number';
@@ -491,20 +490,35 @@ let lastOpenAttempt = { tableId: null, time: 0 };
 
 async function openTable(tableId) {
     const now = Date.now();
-    if (lastOpenAttempt.tableId === Number(tableId) && now - lastOpenAttempt.time < 1500) {
-        return;
-    }
+    if (lastOpenAttempt.tableId === Number(tableId) && now - lastOpenAttempt.time < 1500) return;
     lastOpenAttempt = { tableId: Number(tableId), time: now };
 
     try {
-        const opened = await postForm('open_table.php', { table_id: tableId });
-        const view = await postForm('get_session_view.php', { session_id: opened.session_id });
+        const found = findTable(tableId);
+        if (!found) return;
 
+        const existing = sessionForTable(tableId);
         state.openTableId = Number(tableId);
-        state.openSession = view.session;
-        state.openOrders = view.orders;
-        state.openSummary = view.summary;
         state.cart = [];
+
+        if (existing) {
+            const view = await postForm('get_session_view.php', { session_id: existing.session_id });
+            state.openSession = view.session;
+            state.openOrders = view.orders;
+            state.openSummary = view.summary;
+        } else {
+            state.openSession = {
+                session_id: null,
+                status: 'open',
+                table: {
+                    table_number: found.table.table_number,
+                    floor_name: found.floor.floor_name,
+                    chairs: found.table.chairs
+                }
+            };
+            state.openOrders = [];
+            state.openSummary = null;
+        }
 
         renderTableView(true);
     } catch (error) {
@@ -513,7 +527,7 @@ async function openTable(tableId) {
 }
 
 async function refreshOpenTable() {
-    if (!state.openSession) return;
+    if (!state.openSession || !state.openSession.session_id) return;
 
     try {
         const view = await postForm('get_session_view.php', { session_id: state.openSession.session_id });
@@ -604,6 +618,11 @@ sendOrderButton.addEventListener('click', async () => {
     sendOrderButton.disabled = true;
 
     try {
+        if (!state.openSession.session_id) {
+            const opened = await postForm('open_table.php', { table_id: state.openTableId });
+            state.openSession.session_id = opened.session_id;
+        }
+
         const payload = await postForm('add_order_items.php', {
             session_id: state.openSession.session_id,
             items: JSON.stringify(state.cart)
@@ -629,6 +648,11 @@ const historyModal = document.getElementById('history_modal');
 
 document.getElementById('btn_close_table').addEventListener('click', async () => {
     if (!state.openSession) return;
+
+    if (!state.openSession.session_id) {
+        closeTableView();
+        return;
+    }
 
     try {
         const payload = await postForm('close_session.php', {
@@ -807,7 +831,7 @@ async function pollUpdates(showErrors = true) {
 
         renderSidebar();
 
-        if (state.openSession) {
+        if (state.openSession && state.openSession.session_id) {
             const knownSession = payload.sessions.find(
                 (session) => session.session_id === state.openSession.session_id
             );
