@@ -1,4 +1,4 @@
-# 🍽️ Restaurant System
+# 🍽️ Restaurant System <img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" />
 
 > System zarządzania restauracją — panel kelnera, panel kucharza i panel konfiguracji.  
 > Restaurant management system — waiter panel, chef panel and configuration panel.
