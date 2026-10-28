@@ -5,7 +5,7 @@
 
 ---
 
-## 🇵🇱 Opis projektu (Polski)
+## <img src="client/images/pl.png" height="20" style="vertical-align: middle;" /> Opis projektu (Polski)
 
 **Restaurant System** to aplikacja webowa stworzona dla restauracji, która ułatwia codzienną pracę zespołu.  
 Łączy trzy panele:
@@ -27,7 +27,7 @@
 
 ---
 
-## 🇬🇧 Project description (English)
+## <img src="client/images/uk.png" height="20" style="vertical-align: middle;" /> Project description (English)
 
 **Restaurant System** is a web application built for restaurants to streamline daily operations.  
 It consists of three panels:
