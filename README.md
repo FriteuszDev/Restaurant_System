@@ -89,5 +89,4 @@ Restaurant_System/
 
 ## 📄 Licencja / License
 
-Projekt edukacyjny. / Educational project.
-PY
+Projekt do portfolio. / Portfolio project.
