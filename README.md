@@ -14,7 +14,7 @@
 - **Panel Kucharza** — kolejka dań do przygotowania, oznaczanie dań jako gotowe, historia kuchni.
 - **Panel Konfiguracji** — zarządzanie menu, kategoriami, pracownikami, stanowiskami, stolikami/piętrami i ustawieniami restauracji.
 
-###<img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" /> Co można zrobić?
+### <img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" /> Co można zrobić?
 
 - 🪑 **Stoliki i piętra** — dodawanie/usuwanie pięter i stolików, ustawianie liczby krzeseł.
 - 📋 **Menu i kategorie** — tworzenie kategorii (np. Drinks), dodawanie dań z ceną i opisem, przypisywanie dań do kategorii.
@@ -36,7 +36,7 @@ It consists of three panels:
 - **Chef Panel** — cooking queue, marking dishes as ready, kitchen history.
 - **Config Panel** — management of menu, categories, employees, positions, tables/floors and restaurant settings.
 
-###<img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" /> What can you do?
+### <img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" /> What can you do?
 
 - 🪑 **Tables and floors** — add/remove floors and tables, set number of chairs.
 - 📋 **Menu and categories** — create categories (e.g. Drinks), add dishes with price and description, assign dishes to categories.
