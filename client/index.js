@@ -26,7 +26,7 @@ if (loginForm) {
                     throw new Error((payload && payload.message) || 'Login failed.');
                 }
 
-                window.location.href = payload.redirect;
+                window.location.replace(payload.redirect);
             })
             .catch((error) => {
                 errorBox.textContent = error.message;
