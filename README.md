@@ -74,7 +74,7 @@ Restaurant_System/
 
 ---
 
-## 🚀|<img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" /> Uruchomienie / Running
+## 🚀 Uruchomienie / Running
 
 1. Skopiuj projekt do katalogu serwera (np. `htdocs`).  
    Copy the project into your server directory (e.g. `htdocs`).
@@ -89,4 +89,4 @@ Restaurant_System/
 
 ## 📄 Licencja / License
 
-Projekt do portfolio. / Portfolio project.
+<img src="client/images/FriteuszDEV_logo.png" height="20" style="vertical-align: middle;" /> Projekt do portfolio. / Portfolio project.
