@@ -1,9 +1,11 @@
 const API_PATH = '../../php/';
 
-const queueElement = document.getElementById('queue');
-const queueCounter = document.getElementById('queue_counter');
+const cookElement = document.getElementById('queue_cook');
+const readyElement = document.getElementById('queue_ready');
+const cookCounter = document.getElementById('cook_counter');
+const readyCounter = document.getElementById('ready_counter');
 
-let lastItemsSignature = '';
+// no signature cache - always render to reflect DB state instantly
 
 function toast(message, isError = false) {
     const box = document.getElementById('chef_toasts');
@@ -30,6 +32,7 @@ function postForm(endpoint, data) {
 
     return fetch(API_PATH + endpoint, {
         method: 'POST',
+        cache: 'no-store',
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(async (response) => {
@@ -49,6 +52,7 @@ function postForm(endpoint, data) {
 
 function getJson(endpoint) {
     return fetch(API_PATH + endpoint, {
+        cache: 'no-store',
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(async (response) => {
         const payload = await response.json().catch(() => null);
@@ -71,7 +75,7 @@ function itemStatusLabel(status) {
     return 'New';
 }
 
-function buildItemCard(item) {
+function buildItemCard(item, columnType) {
     const card = document.createElement('div');
     card.className = 'item_card item_' + item.item_status;
     card.dataset.itemId = String(item.item_id);
@@ -122,24 +126,26 @@ function buildItemCard(item) {
     const actions = document.createElement('div');
     actions.className = 'item_actions';
 
-    if (item.item_status === 'new') {
-        const claimButton = document.createElement('button');
-        claimButton.type = 'button';
-        claimButton.className = 'btn_claim';
-        claimButton.dataset.action = 'claim';
-        claimButton.dataset.itemId = String(item.item_id);
-        claimButton.innerHTML = '<i class="fa-solid fa-hand"></i> Biorę na siebie';
-        actions.appendChild(claimButton);
-    }
+    if (columnType === 'cook') {
+        if (item.item_status === 'new') {
+            const claimButton = document.createElement('button');
+            claimButton.type = 'button';
+            claimButton.className = 'btn_claim';
+            claimButton.dataset.action = 'claim';
+            claimButton.dataset.itemId = String(item.item_id);
+            claimButton.innerHTML = '<i class="fa-solid fa-hand"></i> Biorę na siebie';
+            actions.appendChild(claimButton);
+        }
 
-    if (item.item_status !== 'ready') {
-        const readyButton = document.createElement('button');
-        readyButton.type = 'button';
-        readyButton.className = 'btn_ready';
-        readyButton.dataset.action = 'ready';
-        readyButton.dataset.itemId = String(item.item_id);
-        readyButton.innerHTML = '<i class="fa-solid fa-check"></i> Ready';
-        actions.appendChild(readyButton);
+        if (item.item_status !== 'ready') {
+            const readyButton = document.createElement('button');
+            readyButton.type = 'button';
+            readyButton.className = 'btn_ready';
+            readyButton.dataset.action = 'ready';
+            readyButton.dataset.itemId = String(item.item_id);
+            readyButton.innerHTML = '<i class="fa-solid fa-check"></i> Ready';
+            actions.appendChild(readyButton);
+        }
     }
 
     card.appendChild(actions);
@@ -147,23 +153,20 @@ function buildItemCard(item) {
 }
 
 
-function renderQueue(items) {
-    const signature = items
-        .map((item) => item.item_id + ':' + item.item_status + ':' + (item.claimed_by_name || ''))
-        .join('|');
+function renderColumn(element, counter, items, columnType) {
+    counter.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> ' + items.length;
 
-    queueCounter.innerHTML = '<i class="fa-solid fa-hourglass-half"></i> ' + items.length;
-
-    if (signature === lastItemsSignature) return;
-    lastItemsSignature = signature;
-
-    queueElement.textContent = '';
+    element.textContent = '';
 
     if (!items.length) {
         const empty = document.createElement('div');
         empty.className = 'queue_empty';
-        empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>No orders in kitchen - everything ready!';
-        queueElement.appendChild(empty);
+        if (columnType === 'cook') {
+            empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>Brak zamówień do przygotowania!';
+        } else {
+            empty.innerHTML = '<i class="fa-solid fa-face-smile"></i><br>Brak dań gotowych do odbioru!';
+        }
+        element.appendChild(empty);
         return;
     }
 
@@ -188,33 +191,32 @@ function renderQueue(items) {
         const header = document.createElement('div');
         header.className = 'group_header';
         header.innerHTML = '<i class="fa-solid fa-table-cells"></i> ';
-        header.append('Table #' + group.table_number + ' (' + group.floor_name + ')');
+        header.append('Stolik #' + group.table_number + ' (' + group.floor_name + ')');
         box.appendChild(header);
 
-        const readyCount = group.items.filter((item) => item.item_status === 'ready').length;
-        const progress = document.createElement('div');
-        progress.className = 'group_progress';
-        progress.textContent = readyCount + '/' + group.items.length + ' ready';
-        header.appendChild(progress);
-
         group.items.forEach((item) => {
-            box.appendChild(buildItemCard(item));
+            box.appendChild(buildItemCard(item, columnType));
         });
 
-        queueElement.appendChild(box);
+        element.appendChild(box);
     });
+}
+
+function renderQueue(toCook, readyForPickup) {
+    renderColumn(cookElement, cookCounter, toCook, 'cook');
+    renderColumn(readyElement, readyCounter, readyForPickup, 'ready');
 }
 
 async function pollQueue(showErrors = true) {
     try {
         const payload = await getJson('get_chef_queue.php');
-        renderQueue(payload.items);
+        renderQueue(payload.to_cook || [], payload.ready_for_pickup || []);
     } catch (error) {
         if (showErrors) toast(error.message, true);
     }
 }
 
-queueElement.addEventListener('click', async (event) => {
+document.getElementById('queue_split').addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) return;
 
@@ -233,5 +235,5 @@ queueElement.addEventListener('click', async (event) => {
 });
 
 pollQueue(false);
-setInterval(() => pollQueue(false), 4000);
+setInterval(() => pollQueue(false), 2000);
 

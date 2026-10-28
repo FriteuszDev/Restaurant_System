@@ -42,6 +42,7 @@ function postForm(endpoint, data) {
 
     return fetch(API_PATH + endpoint, {
         method: 'POST',
+        cache: 'no-store',
         body: formData,
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(async (response) => {
@@ -61,6 +62,7 @@ function postForm(endpoint, data) {
 
 function getJson(endpoint) {
     return fetch(API_PATH + endpoint, {
+        cache: 'no-store',
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
     }).then(async (response) => {
         const payload = await response.json().catch(() => null);
@@ -119,6 +121,44 @@ function currentTableStatus(tableId) {
     return 'free';
 }
 
+function readyCountForTable(tableId) {
+    return state.items.filter((item) =>
+        item.table_id === Number(tableId) && item.item_status === 'ready'
+    ).length;
+}
+
+function computeTableStatus(tableId) {
+    const found = findTable(tableId);
+    if (!found) return 'free';
+
+    const session = sessionForTable(tableId);
+    if (!session) return 'free';
+
+    if (session.status === 'paid') return 'free';
+    if (session.status === 'to_pay') return 'busy';
+
+    const readyCount = readyCountForTable(tableId);
+    const hasNewOrClaimed = state.items.some((item) =>
+        item.table_id === Number(tableId) &&
+        (item.item_status === 'new' || item.item_status === 'claimed')
+    );
+
+    if (readyCount > 0) return 'busy';
+    if (hasNewOrClaimed) return 'waiting';
+    return 'waiting';
+}
+
+function tableStatusColorClass(status) {
+    if (status === 'busy') return 'status_occupied';
+    if (status === 'waiting') return 'status_waiting';
+    return 'status_free';
+}
+
+function tableStatusLabel(status) {
+    if (status === 'busy') return 'Zajęty';
+    if (status === 'waiting') return 'Czeka';
+    return 'Wolny';
+}
 
 function renderSidebar() {
     const container = document.getElementById('floors_container');
@@ -155,9 +195,10 @@ function renderSidebar() {
         }
 
         floor.tables.forEach((table) => {
-            const status = currentTableStatus(table.table_id);
+            const tStatus = computeTableStatus(table.table_id);
+            const readyCount = readyCountForTable(table.table_id);
             const card = document.createElement('div');
-            card.className = 'table_card status_' + status + (state.openTableId === table.table_id ? ' selected' : '');
+            card.className = 'table_card ' + tableStatusColorClass(tStatus) + (state.openTableId === table.table_id ? ' selected' : '');
             card.dataset.tableId = String(table.table_id);
             card.style.cursor = 'pointer';
 
@@ -173,8 +214,14 @@ function renderSidebar() {
             chairs.append(' ' + table.chairs);
 
             const badge = document.createElement('div');
-            badge.className = 'table_card_status';
-            badge.textContent = statusLabel(status);
+            badge.className = 'table_card_badge';
+            if (readyCount > 0) {
+                badge.textContent = readyCount;
+                badge.classList.add('badge_ready');
+            } else {
+                badge.textContent = tableStatusLabel(tStatus);
+                badge.classList.add('badge_status');
+            }
 
             card.append(number, chairs, badge);
 
@@ -265,6 +312,15 @@ function renderOrders() {
                 note.appendChild(noteIcon);
                 note.append(' ' + item.note);
                 itemBox.appendChild(note);
+            }
+
+            if (item.item_status === 'ready') {
+                const serveBtn = document.createElement('button');
+                serveBtn.type = 'button';
+                serveBtn.className = 'btn_serve';
+                serveBtn.dataset.itemId = String(item.item_id);
+                serveBtn.innerHTML = '<i class="fa-solid fa-bowl-food"></i> Serve';
+                itemBox.appendChild(serveBtn);
             }
 
             orderBox.appendChild(itemBox);
@@ -633,10 +689,29 @@ sendOrderButton.addEventListener('click', async () => {
 
         await refreshOpenTable();
         renderCart();
+        await pollUpdates(false);
     } catch (error) {
         toast(error.message, true);
     } finally {
         sendOrderButton.disabled = false;
+    }
+});
+
+ordersList.addEventListener('click', async (event) => {
+    const serveBtn = event.target.closest('.btn_serve');
+    if (!serveBtn) return;
+
+    serveBtn.disabled = true;
+    try {
+        const itemId = serveBtn.dataset.itemId;
+        const payload = await postForm('serve_item.php', { item_id: itemId });
+        toast(payload.message);
+        await pollUpdates(false);
+        await refreshOpenTable();
+    } catch (error) {
+        toast(error.message, true);
+    } finally {
+        serveBtn.disabled = false;
     }
 });
 
@@ -853,7 +928,7 @@ async function pollUpdates(showErrors = true) {
 renderSidebar();
 renderMenu();
 pollUpdates(false);
-setInterval(() => pollUpdates(false), 4000);
+setInterval(() => pollUpdates(false), 2000);
 
 
 

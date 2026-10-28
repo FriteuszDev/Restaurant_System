@@ -18,15 +18,15 @@ $stmt = db()->query(
      LEFT JOIN employees e ON e.employee_id = oi.claimed_by
      LEFT JOIN employees w ON w.employee_id = o.waiter_id
      WHERE ts.status = 'open'
-       AND (oi.item_status IN ('new', 'claimed')
-            OR (oi.item_status = 'ready' AND oi.ready_at >= NOW() - INTERVAL 10 MINUTE))
+       AND oi.item_status IN ('new', 'claimed', 'ready')
      ORDER BY o.order_id, oi.item_id"
 );
 
-$items = [];
+$toCook = [];
+$readyForPickup = [];
 
 while ($row = $stmt->fetch()) {
-    $items[] = [
+    $item = [
         'item_id' => (int) $row['item_id'],
         'order_id' => (int) $row['order_id'],
         'session_id' => (int) $row['session_id'],
@@ -42,10 +42,17 @@ while ($row = $stmt->fetch()) {
         'created_at' => $row['created_at'],
         'ready_at' => $row['ready_at'],
     ];
+
+    if ($item['item_status'] === 'ready') {
+        $readyForPickup[] = $item;
+    } else {
+        $toCook[] = $item;
+    }
 }
 
 json_out([
     'success' => true,
-    'items' => $items,
+    'to_cook' => $toCook,
+    'ready_for_pickup' => $readyForPickup,
     'server_time' => date('Y-m-d H:i:s'),
 ]);

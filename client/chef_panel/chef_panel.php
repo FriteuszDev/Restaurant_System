@@ -37,7 +37,6 @@ $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
             </div>
 
             <div class="topbar_right">
-                <span id="queue_counter" class="queue_counter"><i class="fa-solid fa-hourglass-half"></i> 0</span>
                 <span class="auto_refresh"><i class="fa-solid fa-rotate"></i> Auto-refresh</span>
                 <?php if ($can['waiter_access']): ?>
                 <a class="btn_nav" href="../waiter_panel/waiter_panel.php"><i class="fa-solid fa-bell-concierge"></i> Waiter</a>
@@ -50,8 +49,24 @@ $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
         </div>
 
         <div class="chef_main">
-            <div class="queue_wrapper">
-                <div id="queue" class="queue"></div>
+            <div id="queue_split" class="queue_split">
+                <div class="queue_column column_cook">
+                    <div class="column_header">
+                        <i class="fa-solid fa-fire-burner"></i>
+                        <span>Do zrobienia</span>
+                        <span id="cook_counter" class="column_counter">0</span>
+                    </div>
+                    <div id="queue_cook" class="queue"></div>
+                </div>
+
+                <div class="queue_column column_ready">
+                    <div class="column_header">
+                        <i class="fa-solid fa-bell"></i>
+                        <span>Gotowe do odbioru</span>
+                        <span id="ready_counter" class="column_counter">0</span>
+                    </div>
+                    <div id="queue_ready" class="queue"></div>
+                </div>
             </div>
         </div>
 

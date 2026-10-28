@@ -188,12 +188,12 @@ body {
     background-color: rgb(46, 125, 50);
 }
 
-.table_card.status_occupied {
-    background-color: rgb(198, 40, 40);
+.table_card.status_waiting {
+    background-color: rgb(230, 126, 34);
 }
 
-.table_card.status_to_pay {
-    background-color: rgb(230, 126, 34);
+.table_card.status_occupied {
+    background-color: rgb(198, 40, 40);
 }
 
 .table_card.selected {
@@ -209,10 +209,25 @@ body {
     opacity: 0.9;
 }
 
-.table_card_status {
+.table_card_badge {
     font-size: 72%;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(2px);
+}
+
+.table_card_badge.badge_ready {
+    background-color: rgb(255, 215, 0);
+    color: rgb(40, 40, 40);
+    font-weight: 900;
+}
+
+.table_card_badge.badge_status {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
 }
 
 /* ===== Część główna ===== */
@@ -601,6 +616,29 @@ h3 i {
 
 .btn_secondary:hover {
     background-color: rgb(205, 205, 205);
+}
+
+.btn_serve {
+    background-color: rgb(255, 165, 0);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-weight: 900;
+    cursor: pointer;
+    font-size: 85%;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn_serve:hover {
+    background-color: rgb(230, 140, 0);
+}
+
+.btn_serve:disabled {
+    background-color: rgb(160, 160, 160);
+    cursor: not-allowed;
 }
 
 /* ===== Stopka i płatność ===== */
