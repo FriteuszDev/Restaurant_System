@@ -1,61 +1,5 @@
 <?php
-require_once __DIR__ . '/../../php/auth.php';
-
-$employee = require_panel_access('config_access');
-
-$can = [
-    'config_access' => !empty($employee['config_access']),
-    'chef_access' => !empty($employee['chef_access']),
-    'waiter_access' => !empty($employee['waiter_access']),
-    'add_dishes' => !empty($employee['add_dishes']),
-    'delete_dishes' => !empty($employee['delete_dishes']),
-    'edit_dishes' => !empty($employee['edit_dishes']),
-    'add_employees' => !empty($employee['add_employees']),
-    'delete_employees' => !empty($employee['delete_employees']),
-    'edit_employees' => !empty($employee['edit_employees']),
-    'add_grades' => !empty($employee['add_grades']),
-    'delete_grades' => !empty($employee['delete_grades']),
-    'edit_grades' => !empty($employee['edit_grades']),
-    'edit_tables' => !empty($employee['edit_tables']),
-    'manage_settings' => !empty($employee['manage_settings']),
-];
-
-$host = 'localhost';
-$db   = 'Restaurant_System';
-$user = 'root';
-$pass = '';
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    $all_dishes = $pdo->query("SELECT m.*, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll(PDO::FETCH_ASSOC);
-$all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_name")->fetchAll(PDO::FETCH_ASSOC);
-    $all_employees = $pdo->query("SELECT * FROM employees")->fetchAll(PDO::FETCH_ASSOC);
-    $all_grades = $pdo->query("SELECT * FROM grades")->fetchAll(PDO::FETCH_ASSOC);
-
-    $floors = $pdo->query("SELECT * FROM floors ORDER BY floor_name")->fetchAll(PDO::FETCH_ASSOC);
-    $all_tables = $pdo->query("SELECT * FROM restaurant_tables ORDER BY table_number")->fetchAll(PDO::FETCH_ASSOC);
-
-    $tables_by_floor = [];
-    foreach ($all_tables as $table_row) {
-        $tables_by_floor[(int) $table_row['floor_id']][] = $table_row;
-    }
-
-    $settings = [];
-    $setting_rows = $pdo->query("SELECT * FROM settings")->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($setting_rows as $row) {
-        $settings[$row['setting_key']] = $row['setting_value'];
-    }
-
-    // Kontrakt logo - jedno zrodlo prawdy (settings.setting_value dla 'restaurant_logo').
-    $logo_path = get_logo_path();
-    $logo_src = logo_url($logo_path);
-    $has_custom_logo = $logo_path !== null && $logo_path !== '';
-
-    $employee_full_name = htmlspecialchars(employee_full_name($employee));
-    $employee_grade = htmlspecialchars($employee['grade_name'] ?? 'no position');
-    ?>
+require_once __DIR__ . '/../../php/auth.php'; $employee = require_panel_access('config_access'); $can = [ 'config_access' => !empty($employee['config_access']), 'chef_access' => !empty($employee['chef_access']), 'waiter_access' => !empty($employee['waiter_access']), 'add_dishes' => !empty($employee['add_dishes']), 'delete_dishes' => !empty($employee['delete_dishes']), 'edit_dishes' => !empty($employee['edit_dishes']), 'add_employees' => !empty($employee['add_employees']), 'delete_employees' => !empty($employee['delete_employees']), 'edit_employees' => !empty($employee['edit_employees']), 'add_grades' => !empty($employee['add_grades']), 'delete_grades' => !empty($employee['delete_grades']), 'edit_grades' => !empty($employee['edit_grades']), 'edit_tables' => !empty($employee['edit_tables']), 'manage_settings' => !empty($employee['manage_settings']), ]; $host = 'localhost'; $db = 'Restaurant_System'; $user = 'root'; $pass = ''; try { $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); $all_dishes = $pdo->query("SELECT m.*, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll(PDO::FETCH_ASSOC); $all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_name")->fetchAll(PDO::FETCH_ASSOC); $all_employees = $pdo->query("SELECT * FROM employees")->fetchAll(PDO::FETCH_ASSOC); $all_grades = $pdo->query("SELECT * FROM grades")->fetchAll(PDO::FETCH_ASSOC); $floors = $pdo->query("SELECT * FROM floors ORDER BY floor_name")->fetchAll(PDO::FETCH_ASSOC); $all_tables = $pdo->query("SELECT * FROM restaurant_tables ORDER BY table_number")->fetchAll(PDO::FETCH_ASSOC); $tables_by_floor = []; foreach ($all_tables as $table_row) { $tables_by_floor[(int) $table_row['floor_id']][] = $table_row; } $settings = []; $setting_rows = $pdo->query("SELECT * FROM settings")->fetchAll(PDO::FETCH_ASSOC); foreach ($setting_rows as $row) { $settings[$row['setting_key']] = $row['setting_value']; } $logo_path = get_logo_path(); $logo_src = logo_url($logo_path); $has_custom_logo = $logo_path !== null && $logo_path !== ''; $employee_full_name = htmlspecialchars(employee_full_name($employee)); $employee_grade = htmlspecialchars($employee['grade_name'] ?? 'no position'); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,7 +42,7 @@ $all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_n
         <div class="config_menu is-active">
             <div class="menu">
 
-            <!-- Menu Edit Mode Toolbar -->
+            
             <?php if ($can['edit_dishes'] || $can['delete_dishes']): ?>
             <div class="edit_toolbar">
                 <button type="button" id="btn_edit_mode_menu" class="btn_edit_mode" data-section="menu">
@@ -241,7 +185,7 @@ $all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_n
         <div class="config_employees" data-tab="employees">
             <div class="employees">
 
-            <!-- Employees Edit Mode Toolbar -->
+            
             <?php if ($can['edit_employees'] || $can['delete_employees']): ?>
             <div class="edit_toolbar">
                 <button type="button" id="btn_edit_mode_employees" class="btn_edit_mode" data-section="employees">
@@ -328,14 +272,9 @@ $all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_n
         <div class="config_grades" data-tab="grades">
             <div class="grades">
 
-            <?php $access_icon = function ($value) {
-                $on = ((int) $value) === 1;
-                return $on
-                    ? '<i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i>'
-                    : '<i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i>';
-            } ?>
+            <?php $access_icon = function ($value) { $on = ((int) $value) === 1; return $on ? '<i class="fa-solid fa-circle-check" style="color: rgb(0, 209, 21);"></i>' : '<i class="fa-solid fa-circle-xmark" style="color: rgb(215, 25, 25);"></i>'; } ?>
 
-            <!-- Grades Edit Mode Toolbar -->
+            
             <?php if ($can['edit_grades'] || $can['delete_grades']): ?>
             <div class="edit_toolbar">
                 <button type="button" id="btn_edit_mode_grades" class="btn_edit_mode" data-section="grades">
@@ -385,16 +324,7 @@ $all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_n
                             <td class="td_grade_id"><?php echo $row['grade_id'] ?></td>
                             <td class="td_grade_name" data-field="grade_name"><?php echo htmlspecialchars($row['grade_name']) ?></td>
                             <?php
-                            $grade_flags = [
-                                'chef_access', 'waiter_access', 'config_access',
-                                'add_dishes', 'delete_dishes', 'edit_dishes',
-                                'add_employees', 'delete_employees', 'edit_employees',
-                                'add_grades', 'delete_grades', 'edit_grades',
-                                'edit_tables', 'manage_settings',
-                            ];
-                            foreach ($grade_flags as $flag):
-                                $flag_value = (int) ($row[$flag] ?? 0);
-                            ?>
+ $grade_flags = [ 'chef_access', 'waiter_access', 'config_access', 'add_dishes', 'delete_dishes', 'edit_dishes', 'add_employees', 'delete_employees', 'edit_employees', 'add_grades', 'delete_grades', 'edit_grades', 'edit_tables', 'manage_settings', ]; foreach ($grade_flags as $flag): $flag_value = (int) ($row[$flag] ?? 0); ?>
                             <td class="td_grades" data-flag="<?php echo htmlspecialchars($flag) ?>" data-value="<?php echo $flag_value ?>"><?php echo $access_icon($flag_value) ?></td>
                             <?php endforeach; ?>
 
@@ -562,10 +492,7 @@ $all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_n
 </body>
 </html>
     <?php
-} catch(PDOException $e) {
-    echo "Connection error: " . $e->getMessage();
-}
-?>
+} catch(PDOException $e) { echo "Connection error: " . $e->getMessage(); } ?>
 
 
 

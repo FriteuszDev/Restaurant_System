@@ -233,8 +233,8 @@ function renderSidebar() {
     });
 }
 
-///////////////////////////////////////////////////////////////
-// Widok stolika
+
+
 
 const emptyHint = document.getElementById('empty_hint');
 const tableView = document.getElementById('table_view');
@@ -572,8 +572,8 @@ function renderToPayPanel() {
         : '0.00';
 }
 
-///////////////////////////////////////////////////////////////
-// Akcje: otwieranie stolika, koszyk, wysylanie zamowien
+
+
 
 let lastOpenAttempt = { tableId: null, time: 0 };
 
@@ -596,7 +596,7 @@ async function openTable(tableId) {
             state.openOrders = view.orders;
             state.openSummary = view.summary;
         } else {
-            // Natychmiast otwieramy stolik w bazie - staje sie zajety (pomaranczowy)
+            
             const opened = await postForm('open_table.php', { table_id: Number(tableId) });
             state.openSession = {
                 session_id: opened.session_id,
@@ -766,8 +766,8 @@ ordersList.addEventListener('click', async (event) => {
     }
 });
 
-///////////////////////////////////////////////////////////////
-// Zamykanie stolika, platnosci
+
+
 
 const summaryModal = document.getElementById('summary_modal');
 const historyModal = document.getElementById('history_modal');
@@ -872,8 +872,8 @@ document.getElementById('btn_skip_pay').addEventListener('click', () => {
     pollUpdates(false);
 });
 
-///////////////////////////////////////////////////////////////
-// Historia zamowien
+
+
 
 const historyList = document.getElementById('history_list');
 
@@ -888,7 +888,7 @@ const waiterHistoryFilters = {
     clear: document.getElementById('wh_clear'),
 };
 
-// Populate dish select grouped by category
+
 const waiterDishSelect = waiterHistoryFilters.dish;
 if (waiterDishSelect && state.menu) {
     const groups = {};
@@ -910,7 +910,7 @@ if (waiterDishSelect && state.menu) {
     });
 }
 
-// Populate employee select grouped by grade
+
 const waiterEmpSelect = waiterHistoryFilters.employee;
 if (waiterEmpSelect && (window.INITIAL && window.INITIAL.employees)) {
     const groups = {};
@@ -1055,8 +1055,8 @@ if (btnHistoryX) {
     });
 }
 
-///////////////////////////////////////////////////////////////
-// Odswiezanie (AJAX) + powiadomienia
+
+
 
 async function pollUpdates(showErrors = true) {
     try {

@@ -548,7 +548,7 @@ body {
     }
 }
 
-/* ===== Layout wrappers - Chef panel (struktur, bez zmian kolorow) ===== */
+
 .chef_layout {
     display: flex;
     flex-direction: column;
@@ -571,7 +571,7 @@ body {
     overflow: auto;
 }
 
-/* ===== Kitchen history modal ===== */
+
 .hidden {
     display: none !important;
 }

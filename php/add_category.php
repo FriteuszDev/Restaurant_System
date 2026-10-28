@@ -1,19 +1,2 @@
 <?php
-require_once __DIR__ . '/auth.php';
-
-require_json_access('add_dishes');
-
-$name = trim((string) ($_POST['category_name'] ?? $_POST['name'] ?? ''));
-
-if ($name === '' || mb_strlen($name) > 50) {
-    json_out(['success' => false, 'message' => 'Category name must be 1-50 characters.'], 400);
-}
-
-try {
-    $pdo = db();
-    $stmt = $pdo->prepare("INSERT INTO menu_categories (category_name) VALUES (:name)");
-    $stmt->execute([':name' => $name]);
-    json_out(['success' => true, 'message' => 'Category added.', 'category_id' => (int) $pdo->lastInsertId(), 'category_name' => $name]);
-} catch (PDOException $e) {
-    json_out(['success' => false, 'message' => 'Category already exists or could not be saved.'], 409);
-}
+require_once __DIR__ . '/auth.php'; require_json_access('add_dishes'); $name = trim((string) ($_POST['category_name'] ?? $_POST['name'] ?? '')); if ($name === '' || mb_strlen($name) > 50) { json_out(['success' => false, 'message' => 'Category name must be 1-50 characters.'], 400); } try { $pdo = db(); $stmt = $pdo->prepare("INSERT INTO menu_categories (category_name) VALUES (:name)"); $stmt->execute([':name' => $name]); json_out(['success' => true, 'message' => 'Category added.', 'category_id' => (int) $pdo->lastInsertId(), 'category_name' => $name]); } catch (PDOException $e) { json_out(['success' => false, 'message' => 'Category already exists or could not be saved.'], 409); }

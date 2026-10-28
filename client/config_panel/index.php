@@ -1,31 +1,5 @@
 <?php
-// Config Panel Index - checks permissions and redirects appropriately
-require_once __DIR__ . '/../php/auth.php';
-
-$employee = current_employee();
-
-if (!$employee) {
-    // Not logged in - redirect to login
-    header('Location: ' . project_url('client/index.php'));
-    exit();
-}
-
-$panel_url = default_panel_url($employee);
-
-// If the default panel is NOT the config panel, redirect to it
-if ($panel_url !== 'client/config_panel/config_panel.php') {
-    header('Location: ' . project_url($panel_url));
-    exit();
-}
-
-// If user doesn't have config_access but somehow got here, redirect
-if (!empty($employee['waiter_access']) || !empty($employee['chef_access'])) {
-    header('Location: ' . project_url($panel_url));
-    exit();
-}
-
-// Show the config panel
-?>
+ require_once __DIR__ . '/../php/auth.php'; $employee = current_employee(); if (!$employee) { header('Location: ' . project_url('client/index.php')); exit(); } $panel_url = default_panel_url($employee); if ($panel_url !== 'client/config_panel/config_panel.php') { header('Location: ' . project_url($panel_url)); exit(); } if (!empty($employee['waiter_access']) || !empty($employee['chef_access'])) { header('Location: ' . project_url($panel_url)); exit(); } ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

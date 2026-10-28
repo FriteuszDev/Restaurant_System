@@ -1,23 +1,2 @@
 <?php
-require_once __DIR__ . '/auth.php';
-
-require_json_access('delete_dishes');
-
-$DishIdToDelete = $_POST['DishID'] ?? 'None';
-
-try {
-    $pdo = db();
-
-    $sql = "DELETE FROM menu WHERE dish_id = :dish_id";
-    $stmt = $pdo->prepare($sql);
-
-    $stmt->execute([
-        'dish_id' => $DishIdToDelete
-    ]);
-
-    json_out(['success' => true, 'message' => 'Dish deleted.']);
-} catch (PDOException $e) {
-    json_out(['success' => false, 'message' => 'Error deleting dish.'], 500);
-}
-
-exit();
+require_once __DIR__ . '/auth.php'; require_json_access('delete_dishes'); $DishIdToDelete = $_POST['DishID'] ?? 'None'; try { $pdo = db(); $sql = "DELETE FROM menu WHERE dish_id = :dish_id"; $stmt = $pdo->prepare($sql); $stmt->execute([ 'dish_id' => $DishIdToDelete ]); json_out(['success' => true, 'message' => 'Dish deleted.']); } catch (PDOException $e) { json_out(['success' => false, 'message' => 'Error deleting dish.'], 500); } exit(); 

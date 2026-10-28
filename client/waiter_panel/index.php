@@ -1,31 +1,5 @@
 <?php
-// Waiter Panel Index - checks permissions and redirects appropriately
-require_once __DIR__ . '/../php/auth.php';
-
-$employee = current_employee();
-
-if (!$employee) {
-    // Not logged in - redirect to login
-    header('Location: ' . project_url('client/index.php'));
-    exit();
-}
-
-$panel_url = default_panel_url($employee);
-
-// If the default panel is NOT the waiter panel, redirect to it
-if ($panel_url !== 'client/waiter_panel/waiter_panel.php') {
-    header('Location: ' . project_url($panel_url));
-    exit();
-}
-
-// If user doesn't have waiter_access but somehow got here, redirect
-if (!empty($employee['chef_access']) || !empty($employee['config_access'])) {
-    header('Location: ' . project_url($panel_url));
-    exit();
-}
-
-// Show the waiter panel
-?>
+ require_once __DIR__ . '/../php/auth.php'; $employee = current_employee(); if (!$employee) { header('Location: ' . project_url('client/index.php')); exit(); } $panel_url = default_panel_url($employee); if ($panel_url !== 'client/waiter_panel/waiter_panel.php') { header('Location: ' . project_url($panel_url)); exit(); } if (!empty($employee['chef_access']) || !empty($employee['config_access'])) { header('Location: ' . project_url($panel_url)); exit(); } ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -330,7 +330,7 @@ body {
     z-index: 2;
 }
 
-/* ---- Employees table ---- */
+
 .th_employees,
 .td_employees,
 .td_employees_name,
@@ -351,7 +351,7 @@ body {
     z-index: 2;
 }
 
-/* Surname column: no border on its right edge */
+
 .th_employees_surname {
     border-right: none;
 }
@@ -360,23 +360,6 @@ body {
     border-right: none;
 }
 
-/* Grade column: no border on its left edge (matches Surname's right edge removal) */
-.th_employees_grade {
-    border-left: none;
-}
-
-.td_employees_grade {
-    border-left: none;
-}
-
-/* Surname ↔ Grade border: horizontal separator only, NO vertical border */
-.th_employees_surname {
-    border-right: none;
-}
-
-.td_employees_surname {
-    border-right: none;
-}
 
 .th_employees_grade {
     border-left: none;
@@ -386,7 +369,24 @@ body {
     border-left: none;
 }
 
-/* Grade column: full vertical border on both sides (keeps the separator clean) */
+
+.th_employees_surname {
+    border-right: none;
+}
+
+.td_employees_surname {
+    border-right: none;
+}
+
+.th_employees_grade {
+    border-left: none;
+}
+
+.td_employees_grade {
+    border-left: none;
+}
+
+
 .th_employees_grade {
     border-left: 1px solid #dddddd;
     border-right: 1px solid #dddddd;
@@ -397,7 +397,7 @@ body {
     border-right: 1px solid #dddddd;
 }
 
-/* Delete column: no vertical border on either side */
+
 .th_employees_delete {
     border-left: none;
     border-right: none;
@@ -888,7 +888,7 @@ body {
 }
 
 
-/* ---- Ustawienia restauracji (ukryte domyslnie, pokazywane po kliknieciu zakladki Settings) ---- */
+
 .config_settings {
     background-color: rgb(235, 235, 235);
     padding: 18px;
@@ -991,7 +991,7 @@ body {
 }
 
 
-/* ---- Linki nawigacyjne w user_bar (brakowało definicji) ---- */
+
 .btn_nav {
     background-color: rgb(80, 80, 80);
     color: white;

@@ -1,24 +1,2 @@
 <?php
-function db(): PDO
-{
-    static $pdo = null;
-
-    if ($pdo === null) {
-        $host = 'localhost';
-        $db = 'Restaurant_System';
-        $user = 'root';
-        $pass = '';
-
-        try {
-            $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-            $pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);
-        } catch (PDOException $e) {
-            die("Connection error");
-        }
-    }
-
-    return $pdo;
-}
+function db(): PDO { static $pdo = null; if ($pdo === null) { $host = 'localhost'; $db = 'Restaurant_System'; $user = 'root'; $pass = ''; try { $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass); $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC); $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false); $pdo->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false); } catch (PDOException $e) { die("Connection error"); } } return $pdo; } 

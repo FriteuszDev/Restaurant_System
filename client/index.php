@@ -1,27 +1,7 @@
 <?php
-require_once __DIR__ . '/../php/auth.php';
-
-$employee = current_employee();
-
-if ($employee) {
-    $panel_url = default_panel_url($employee);
-
-    if ($panel_url !== 'client/index.php') {
-        header('Location: ' . project_url($panel_url));
-        exit();
-    }
-}
-
-$denied = isset($_GET['denied']);
-
-$employees = db()->query(
-    "SELECT employee_id, employee_name, employee_surname
+require_once __DIR__ . '/../php/auth.php'; $employee = current_employee(); if ($employee) { $panel_url = default_panel_url($employee); if ($panel_url !== 'client/index.php') { header('Location: ' . project_url($panel_url)); exit(); } } $denied = isset($_GET['denied']); $employees = db()->query( "SELECT employee_id, employee_name, employee_surname
      FROM employees
-     ORDER BY employee_name, employee_surname"
-)->fetchAll();
-
-$restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
-?>
+     ORDER BY employee_name, employee_surname" )->fetchAll(); $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

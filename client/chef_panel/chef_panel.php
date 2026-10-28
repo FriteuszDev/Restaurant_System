@@ -1,22 +1,5 @@
 <?php
-require_once __DIR__ . '/../../php/auth.php';
-
-$employee = require_panel_access('chef_access');
-
-$can = [
-    'config_access' => !empty($employee['config_access']),
-    'waiter_access' => !empty($employee['waiter_access']),
-];
-
-$employee_full_name = htmlspecialchars(employee_full_name($employee));
-
-// Kontrakt logo - jedno zrodlo prawdy (settings.setting_value dla 'restaurant_logo').
-$logo_src = logo_url();
-
-$history_dishes = db()->query("SELECT m.dish_id, m.dish_name, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll();
-$history_employees = db()->query("SELECT e.employee_id, e.employee_name, e.employee_surname, g.grade_name FROM employees e LEFT JOIN grades g ON g.grade_id = e.grade_id ORDER BY g.grade_name, e.employee_name, e.employee_surname")->fetchAll();
-$restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
-?>
+require_once __DIR__ . '/../../php/auth.php'; $employee = require_panel_access('chef_access'); $can = [ 'config_access' => !empty($employee['config_access']), 'waiter_access' => !empty($employee['waiter_access']), ]; $employee_full_name = htmlspecialchars(employee_full_name($employee)); $logo_src = logo_url(); $history_dishes = db()->query("SELECT m.dish_id, m.dish_name, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll(); $history_employees = db()->query("SELECT e.employee_id, e.employee_name, e.employee_surname, g.grade_name FROM employees e LEFT JOIN grades g ON g.grade_id = e.grade_id ORDER BY g.grade_name, e.employee_name, e.employee_surname")->fetchAll(); $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

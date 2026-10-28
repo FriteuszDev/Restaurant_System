@@ -62,7 +62,7 @@ body {
     display: none !important;
 }
 
-/* ===== Układ główny ===== */
+
 .waiter_layout {
     display: flex;
     flex-direction: row;
@@ -70,7 +70,7 @@ body {
     height: 100vh;
 }
 
-/* ===== Sidebar ===== */
+
 .sidebar {
     width: 30%;
     min-width: 260px;
@@ -274,7 +274,7 @@ body {
     color: white;
 }
 
-/* ===== Część główna ===== */
+
 .main {
     flex: 1;
     min-width: 0;
@@ -303,7 +303,7 @@ body {
     margin-bottom: 20px;
 }
 
-/* ===== Widok stolika ===== */
+
 .table_view {
     display: flex;
     flex-direction: column;
@@ -438,7 +438,7 @@ h3 i {
     align-self: flex-start;
 }
 
-/* ===== Zamówienia ===== */
+
 .order_box {
     border: 1px solid #e8e8e8;
     border-radius: 8px;
@@ -514,7 +514,7 @@ h3 i {
     padding: 10px 4px;
 }
 
-/* ===== Menu ===== */
+
 .menu_dish {
     display: flex;
     align-items: center;
@@ -579,7 +579,7 @@ h3 i {
 }
 
 
-/* ===== Koszyk ===== */
+
 .cart_line {
     border: 1px solid #e8e8e8;
     border-radius: 7px;
@@ -652,7 +652,7 @@ h3 i {
     text-align: right;
 }
 
-/* ===== Przyciski ===== */
+
 .btn_primary,
 .btn_warning,
 .btn_secondary {
@@ -719,7 +719,7 @@ h3 i {
     cursor: not-allowed;
 }
 
-/* ===== Stopka i płatność ===== */
+
 .table_view_footer {
     padding: 14px 18px;
     border-top: 1px solid #ececec;
@@ -764,7 +764,7 @@ h3 i {
     flex-wrap: wrap;
 }
 
-/* ===== Modale ===== */
+
 .modal {
     position: fixed;
     inset: 0;
@@ -807,7 +807,7 @@ h3 i {
     font-size: 92%;
 }
 
-/* ===== Toasty ===== */
+
 #waiter_toasts {
     position: fixed;
     right: 20px;
@@ -840,7 +840,7 @@ h3 i {
     transform: translateX(0);
 }
 
-/* ===== Tablet / telefon ===== */
+
 @media (max-width: 900px) {
     body {
         height: auto;

@@ -1,4 +1,4 @@
-// Config Panel JavaScript
+
 (function () {
     'use strict';
 

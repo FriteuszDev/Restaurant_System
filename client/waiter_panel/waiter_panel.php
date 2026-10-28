@@ -1,55 +1,5 @@
 <?php
-require_once __DIR__ . '/../../php/auth.php';
-
-$employee = require_panel_access('waiter_access');
-
-$can = [
-    'config_access' => !empty($employee['config_access']),
-    'chef_access' => !empty($employee['chef_access']),
-];
-
-$floors = db()->query("SELECT floor_id, floor_name FROM floors ORDER BY floor_name")->fetchAll();
-$tables = db()->query(
-    "SELECT table_id, floor_id, table_number, chairs, status FROM restaurant_tables ORDER BY table_number"
-)->fetchAll();
-$categories = db()->query("SELECT category_id, category_name FROM menu_categories ORDER BY category_name")->fetchAll();
-$menu = db()->query("SELECT m.dish_id, m.dish_name, m.dish_price, m.category_id, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll();
-
-$history_employees = db()->query("SELECT e.employee_id, e.employee_name, e.employee_surname, g.grade_name FROM employees e LEFT JOIN grades g ON g.grade_id = e.grade_id ORDER BY g.grade_name, e.employee_name, e.employee_surname")->fetchAll();
-$restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System';
-
-$floors_layout = [];
-$floor_index = [];
-
-foreach ($floors as $floor) {
-    $floor_index[(int) $floor['floor_id']] = count($floors_layout);
-    $floors_layout[] = [
-        'floor_id' => (int) $floor['floor_id'],
-        'floor_name' => $floor['floor_name'],
-        'tables' => [],
-    ];
-}
-
-foreach ($tables as $table) {
-    $floor_id = (int) $table['floor_id'];
-
-    if (!isset($floor_index[$floor_id])) {
-        continue;
-    }
-
-    $floors_layout[$floor_index[$floor_id]]['tables'][] = [
-        'table_id' => (int) $table['table_id'],
-        'table_number' => $table['table_number'],
-        'chairs' => (int) $table['chairs'],
-        'status' => $table['status'],
-    ];
-}
-
-$employee_full_name = htmlspecialchars(employee_full_name($employee));
-
-// Kontrakt logo - jedno zrodlo prawdy (settings.setting_value dla 'restaurant_logo').
-$logo_src = logo_url();
-?>
+require_once __DIR__ . '/../../php/auth.php'; $employee = require_panel_access('waiter_access'); $can = [ 'config_access' => !empty($employee['config_access']), 'chef_access' => !empty($employee['chef_access']), ]; $floors = db()->query("SELECT floor_id, floor_name FROM floors ORDER BY floor_name")->fetchAll(); $tables = db()->query( "SELECT table_id, floor_id, table_number, chairs, status FROM restaurant_tables ORDER BY table_number" )->fetchAll(); $categories = db()->query("SELECT category_id, category_name FROM menu_categories ORDER BY category_name")->fetchAll(); $menu = db()->query("SELECT m.dish_id, m.dish_name, m.dish_price, m.category_id, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll(); $history_employees = db()->query("SELECT e.employee_id, e.employee_name, e.employee_surname, g.grade_name FROM employees e LEFT JOIN grades g ON g.grade_id = e.grade_id ORDER BY g.grade_name, e.employee_name, e.employee_surname")->fetchAll(); $restaurant_name = get_setting('restaurant_name') ?? 'Restaurant System'; $floors_layout = []; $floor_index = []; foreach ($floors as $floor) { $floor_index[(int) $floor['floor_id']] = count($floors_layout); $floors_layout[] = [ 'floor_id' => (int) $floor['floor_id'], 'floor_name' => $floor['floor_name'], 'tables' => [], ]; } foreach ($tables as $table) { $floor_id = (int) $table['floor_id']; if (!isset($floor_index[$floor_id])) { continue; } $floors_layout[$floor_index[$floor_id]]['tables'][] = [ 'table_id' => (int) $table['table_id'], 'table_number' => $table['table_number'], 'chairs' => (int) $table['chairs'], 'status' => $table['status'], ]; } $employee_full_name = htmlspecialchars(employee_full_name($employee)); $logo_src = logo_url(); ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

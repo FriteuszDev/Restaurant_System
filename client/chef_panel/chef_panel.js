@@ -9,7 +9,7 @@ const kitchenHistoryList = document.getElementById('kitchen_history_list');
 const btnKitchenHistory = document.getElementById('btn_kitchen_history');
 const btnKitchenHistoryClose = document.getElementById('btn_kitchen_history_close');
 
-// no signature cache - always render to reflect DB state instantly
+
 
 function toast(message, isError = false) {
     const box = document.getElementById('chef_toasts');
@@ -252,7 +252,7 @@ const kitchenHistoryFilters = {
     clear: document.getElementById('kh_clear'),
 };
 
-// Populate dish select grouped by category
+
 const dishSelect = kitchenHistoryFilters.dish;
 if (dishSelect && window.HISTORY_FILTERS && window.HISTORY_FILTERS.dishes) {
     const groups = {};
@@ -274,7 +274,7 @@ if (dishSelect && window.HISTORY_FILTERS && window.HISTORY_FILTERS.dishes) {
     });
 }
 
-// Populate employee select grouped by grade
+
 const empSelect = kitchenHistoryFilters.employee;
 if (empSelect && window.HISTORY_FILTERS && window.HISTORY_FILTERS.employees) {
     const groups = {};

@@ -1,58 +1,6 @@
 <?php
-require_once __DIR__ . '/auth.php';
-
-$employee = require_json_access('chef_access');
-
-$item_id = (int) ($_POST['item_id'] ?? 0);
-
-if ($item_id <= 0) {
-    json_out(['success' => false, 'message' => 'Invalid item ID.'], 400);
-}
-
-$stmt = db()->prepare("SELECT item_id, item_status FROM order_items WHERE item_id = :item_id");
-$stmt->execute([':item_id' => $item_id]);
-$item = $stmt->fetch();
-
-if (!$item) {
-    json_out(['success' => false, 'message' => 'Item not found.'], 404);
-}
-
-if ($item['item_status'] === 'ready') {
-    json_out(['success' => false, 'message' => 'This item is already marked as ready.'], 409);
-}
-
-$stmt = db()->prepare(
-    "UPDATE order_items
+require_once __DIR__ . '/auth.php'; $employee = require_json_access('chef_access'); $item_id = (int) ($_POST['item_id'] ?? 0); if ($item_id <= 0) { json_out(['success' => false, 'message' => 'Invalid item ID.'], 400); } $stmt = db()->prepare("SELECT item_id, item_status FROM order_items WHERE item_id = :item_id"); $stmt->execute([':item_id' => $item_id]); $item = $stmt->fetch(); if (!$item) { json_out(['success' => false, 'message' => 'Item not found.'], 404); } if ($item['item_status'] === 'ready') { json_out(['success' => false, 'message' => 'This item is already marked as ready.'], 409); } $stmt = db()->prepare( "UPDATE order_items
      SET item_status = 'ready', ready_at = NOW(),
          claimed_by = COALESCE(claimed_by, :employee_id)
-     WHERE item_id = :item_id"
-);
-$stmt->execute([
-    ':employee_id' => $employee['employee_id'],
-    ':item_id' => $item_id,
-]);
-
-// Save to kitchen history
-$stmt2 = db()->prepare("SELECT dish_name, quantity FROM order_items WHERE item_id = :item_id");
-$stmt2->execute([':item_id' => $item_id]);
-$dish = $stmt2->fetch();
-
-if ($dish) {
-    $stmt3 = db()->prepare(
-        "INSERT INTO kitchen_history (order_item_id, dish_name, quantity, action_type, employee_id, employee_name)
-         VALUES (:item_id, :dish_name, :quantity, 'ready', :employee_id, :employee_name)"
-    );
-    $stmt3->execute([
-        ':item_id' => $item_id,
-        ':dish_name' => $dish['dish_name'],
-        ':quantity' => (int) $dish['quantity'],
-        ':employee_id' => $employee['employee_id'],
-        ':employee_name' => employee_full_name($employee),
-    ]);
-}
-
-json_out([
-    'success' => true,
-    'message' => 'Item marked as ready - waiter notified.',
-    'item_id' => $item_id,
-]);
+     WHERE item_id = :item_id" ); $stmt->execute([ ':employee_id' => $employee['employee_id'], ':item_id' => $item_id, ]); $stmt2 = db()->prepare("SELECT dish_name, quantity FROM order_items WHERE item_id = :item_id"); $stmt2->execute([':item_id' => $item_id]); $dish = $stmt2->fetch(); if ($dish) { $stmt3 = db()->prepare( "INSERT INTO kitchen_history (order_item_id, dish_name, quantity, action_type, employee_id, employee_name)
+         VALUES (:item_id, :dish_name, :quantity, 'ready', :employee_id, :employee_name)" ); $stmt3->execute([ ':item_id' => $item_id, ':dish_name' => $dish['dish_name'], ':quantity' => (int) $dish['quantity'], ':employee_id' => $employee['employee_id'], ':employee_name' => employee_full_name($employee), ]); } json_out([ 'success' => true, 'message' => 'Item marked as ready - waiter notified.', 'item_id' => $item_id, ]); 
