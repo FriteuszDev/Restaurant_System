@@ -32,13 +32,14 @@ if ($section === 'menu') {
 
     if (!empty($employee['edit_dishes'])) {
         $stmt = $pdo->prepare(
-            'UPDATE menu SET dish_name = :name, dish_desc = :desc, dish_price = :price WHERE dish_id = :id'
+            'UPDATE menu SET dish_name = :name, dish_desc = :desc, dish_price = :price, category_id = :category_id WHERE dish_id = :id'
         );
         foreach ((array) $rows as $row) {
             $dishId = (int) ($row['dish_id'] ?? 0);
             $name = trim((string) ($row['dish_name'] ?? ''));
             $desc = trim((string) ($row['dish_desc'] ?? ''));
             $price = $row['dish_price'] ?? '';
+            $categoryId = (int) ($row['category_id'] ?? 0);
             
 
             if ($dishId <= 0 || $name === '' || mb_strlen($name) > 100) {
@@ -55,6 +56,7 @@ if ($section === 'menu') {
                 ':name' => $name,
                 ':desc' => $desc,
                 ':price' => (float) $price,
+                ':category_id' => $categoryId > 0 ? $categoryId : null,
                 ':id' => $dishId,
             ]);
         }
@@ -272,6 +274,39 @@ if ($section === 'tables') {
     }
 
     json_out(['success' => true, 'message' => 'Table changes saved.']);
+}
+
+if ($section === 'categories') {
+    if (empty($employee['edit_dishes']) && empty($employee['delete_dishes'])) {
+        json_out(['success' => false, 'message' => 'Access denied to this operation.'], 403);
+    }
+
+    $rows = $payload['rows'] ?? [];
+    $deleted = $payload['deleted'] ?? [];
+
+    if (!empty($employee['delete_dishes'])) {
+        foreach ((array) $deleted as $categoryId) {
+            $categoryId = (int) $categoryId;
+            if ($categoryId <= 0) continue;
+            // Reassign dishes to default General category (or null)
+            $pdo->prepare('UPDATE menu SET category_id = NULL WHERE category_id = :id')->execute([':id' => $categoryId]);
+            $pdo->prepare('DELETE FROM menu_categories WHERE category_id = :id')->execute([':id' => $categoryId]);
+        }
+    }
+
+    if (!empty($employee['edit_dishes'])) {
+        $stmt = $pdo->prepare('UPDATE menu_categories SET category_name = :name WHERE category_id = :id');
+        foreach ((array) $rows as $row) {
+            $categoryId = (int) ($row['category_id'] ?? 0);
+            $name = trim((string) ($row['category_name'] ?? ''));
+            if ($categoryId <= 0 || $name === '' || mb_strlen($name) > 50) {
+                json_out(['success' => false, 'message' => 'Invalid category data.'], 400);
+            }
+            $stmt->execute([':name' => $name, ':id' => $categoryId]);
+        }
+    }
+
+    json_out(['success' => true, 'message' => 'Category changes saved.']);
 }
 
 json_out(['success' => false, 'message' => 'Unknown section.'], 400);

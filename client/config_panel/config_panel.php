@@ -29,7 +29,8 @@ try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $all_dishes = $pdo->query("SELECT * FROM menu")->fetchAll(PDO::FETCH_ASSOC);
+    $all_dishes = $pdo->query("SELECT m.*, mc.category_name FROM menu m LEFT JOIN menu_categories mc ON mc.category_id = m.category_id ORDER BY mc.category_name, m.dish_name")->fetchAll(PDO::FETCH_ASSOC);
+$all_categories = $pdo->query("SELECT * FROM menu_categories ORDER BY category_name")->fetchAll(PDO::FETCH_ASSOC);
     $all_employees = $pdo->query("SELECT * FROM employees")->fetchAll(PDO::FETCH_ASSOC);
     $all_grades = $pdo->query("SELECT * FROM grades")->fetchAll(PDO::FETCH_ASSOC);
 
@@ -68,6 +69,7 @@ try {
 <body>
         <div class="tabs_container">
                 <div class="tab_menu active" data-tab="menu"><span><i class="fa-solid fa-utensils"></i></span> Menu</div>
+                <div class="tab_categories" data-tab="categories"><span><i class="fa-solid fa-list"></i></span> Categories</div>
                 <div class="tab_employees" data-tab="employees"><span><i class="fa-solid fa-users-gear"></i></span> Employees</div>
                 <div class="tab_grades" data-tab="grades"><span><i class="fa-solid fa-user-shield"></i></span> Grades</div>
                 <div class="tab_tables" data-tab="tables"><span><i class="fa-solid fa-table-cells"></i></span> Tables</div>
@@ -125,6 +127,7 @@ try {
                         <th class="th_menu">Name:</th>
                         <th class="th_menu">Description:</th>
                         <th class="th_menu">Price:</th>
+                        <th class="th_menu">Category:</th>
                         
                         <?php if ($can['delete_dishes']): ?>
                         <th class="th_menu"></th>
@@ -137,6 +140,14 @@ try {
                             <td class="td_menu_name" data-field="dish_name"><?php echo htmlspecialchars((string) $row['dish_name']) ?></td>
                             <td class="td_menu" data-field="dish_desc"><?php echo htmlspecialchars((string) ($row['dish_desc'] ?? '')) ?></td>
                             <td class="td_menu" data-field="dish_price"><?php echo htmlspecialchars((string) $row['dish_price']) ?></td>
+                            <td class="td_menu_category" data-field="category_id">
+                                <select class="menu_category_select" data-field="category_id" disabled>
+                                    <option value="">Uncategorized</option>
+                                    <?php foreach ($all_categories as $cat): ?>
+                                    <option value="<?php echo (int) $cat['category_id'] ?>"<?php echo ((int)($row['category_id'] ?? 0) === (int)$cat['category_id']) ? ' selected' : '' ?>><?php echo htmlspecialchars($cat['category_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
 <?php if ($can['delete_dishes']): ?>
 <td class="td_menu"><i class="fa-solid fa-trash dish_delete" style="color: rgb(251, 59, 59);" title="Delete dish (Edit Mode required)"></i></td>
 <?php endif; ?>
@@ -154,14 +165,22 @@ try {
                     <th class="th_add">Name:</th>
                     <th class="th_add">Description:</th>
                     <th class="th_add">Price:</th>
+                    <th class="th_add">Category:</th>
                     
                     <th class="th_add"></th>
                 </tr>
                 <tr class="tr_add">
                         <td class="td_add"><input type="text" maxlength="100" name="dish_name" required></td>
                         <td class="td_add"><input type="text" maxlength="500" name="dish_desc" required></td>
-                        <td class="td_add"><input type="text" name="dish_price" inputmode="decimal" pattern="^\d{1,8}(\.\d{1,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" placeholder="np. 10.50" required></td>
-                        <td class="td_add"></td>
+                        <td class="td_add"><input type="text" name="dish_price" inputmode="decimal" pattern="^\d{1,8}(\.\d{1,2})?$" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');" required></td>
+                        <td class="td_add">
+                            <select name="category_id" class="add_category_select">
+                                <option value="">Uncategorized</option>
+                                <?php foreach ($all_categories as $cat): ?>
+                                <option value="<?php echo (int) $cat['category_id'] ?>"><?php echo htmlspecialchars($cat['category_name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
                         <td class="td_add"><button type="submit" class="btn_dish_add">ADD DISH</button></td>
                 </tr>
             </table>
@@ -169,6 +188,55 @@ try {
             <?php endif; ?>
                         </div>
                     </div>
+
+        <div class="config_categories" data-tab="categories">
+            <div class="categories">
+                <?php if ($can['edit_dishes'] || $can['delete_dishes']): ?>
+                <div class="edit_toolbar">
+                    <button type="button" id="btn_edit_mode_categories" class="btn_edit_mode" data-section="categories">
+                        <i class="fa-solid fa-pen"></i> Edit Mode
+                    </button>
+                    <button type="button" id="btn_save_categories" class="btn_save_changes" data-section="categories" style="display:none;">
+                        <i class="fa-solid fa-save"></i> Save Changes
+                    </button>
+                    <button type="button" id="btn_cancel_categories" class="btn_cancel_changes" data-section="categories" style="display:none;">
+                        <i class="fa-solid fa-ban"></i> Cancel
+                    </button>
+                    <button type="button" id="btn_undo_categories" class="btn_undo_redo" data-section="categories" data-action="undo" style="display:none;">
+                        <i class="fa-solid fa-rotate-left"></i> Undo
+                    </button>
+                    <button type="button" id="btn_redo_categories" class="btn_undo_redo" data-section="categories" data-action="redo" style="display:none;">
+                        <i class="fa-solid fa-rotate-right"></i> Redo
+                    </button>
+                </div>
+                <?php endif; ?>
+
+                <button type="button" id="btn_show_add_category" class="btn_category_add" style="margin-bottom:8px;">ADD CATEGORY</button>
+                <form id="add_category_form" method="POST" action="../../php/add_category.php" class="ajax_add_form" data-add-type="category" style="display:none;">
+                    <input type="text" name="category_name" class="category_name_input" placeholder="New category name" required>
+                    <button type="submit" class="btn_dish_add">ADD</button>
+                </form>
+
+                <table class="table_categories">
+                    <tr>
+                        <th class="th_categories">ID:</th>
+                        <th class="th_categories">Name:</th>
+                        <?php if ($can['delete_dishes']): ?>
+                        <th class="th_categories"></th>
+                        <?php endif; ?>
+                    </tr>
+                    <?php foreach ($all_categories as $cat): ?>
+                    <tr class="tr_categories" data-category-id="<?php echo (int) $cat['category_id'] ?>">
+                        <td class="td_categories_id"><?php echo (int) $cat['category_id'] ?></td>
+                        <td class="td_categories_name" data-field="category_name"><?php echo htmlspecialchars($cat['category_name']) ?></td>
+                        <?php if ($can['delete_dishes']): ?>
+                        <td class="td_categories"><i class="fa-solid fa-trash category_delete" title="Delete category (Edit Mode required)"></i></td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                </table>
+            </div>
+        </div>
 
         <div class="config_employees" data-tab="employees">
             <div class="employees">

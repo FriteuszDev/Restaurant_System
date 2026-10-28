@@ -241,14 +241,121 @@ document.getElementById('queue_split').addEventListener('click', async (event) =
 pollQueue(false);
 setInterval(() => pollQueue(false), 2000);
 
+const kitchenHistoryFilters = {
+    dateFrom: document.getElementById('kh_date_from'),
+    dateTo: document.getElementById('kh_date_to'),
+    timeFrom: document.getElementById('kh_time_from'),
+    timeTo: document.getElementById('kh_time_to'),
+    dish: document.getElementById('kh_dish'),
+    employee: document.getElementById('kh_employee'),
+    apply: document.getElementById('kh_apply'),
+    clear: document.getElementById('kh_clear'),
+};
+
+// Populate dish select grouped by category
+const dishSelect = kitchenHistoryFilters.dish;
+if (dishSelect && window.HISTORY_FILTERS && window.HISTORY_FILTERS.dishes) {
+    const groups = {};
+    window.HISTORY_FILTERS.dishes.forEach((d) => {
+        const cat = d.category_name || 'Uncategorized';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(d);
+    });
+    Object.keys(groups).forEach((cat) => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = cat;
+        groups[cat].forEach((d) => {
+            const opt = document.createElement('option');
+            opt.value = d.dish_name;
+            opt.textContent = d.dish_name;
+            optgroup.appendChild(opt);
+        });
+        dishSelect.appendChild(optgroup);
+    });
+}
+
+// Populate employee select grouped by grade
+const empSelect = kitchenHistoryFilters.employee;
+if (empSelect && window.HISTORY_FILTERS && window.HISTORY_FILTERS.employees) {
+    const groups = {};
+    window.HISTORY_FILTERS.employees.forEach((e) => {
+        const grade = e.grade_name || 'No position';
+        if (!groups[grade]) groups[grade] = [];
+        groups[grade].push(e);
+    });
+    Object.keys(groups).forEach((grade) => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = grade;
+        groups[grade].forEach((e) => {
+            const opt = document.createElement('option');
+            opt.value = e.employee_id;
+            opt.textContent = e.employee_name + ' ' + e.employee_surname;
+            optgroup.appendChild(opt);
+        });
+        empSelect.appendChild(optgroup);
+    });
+}
+
+let allKitchenHistory = [];
+
 async function loadKitchenHistory() {
     try {
         const payload = await getJson('get_kitchen_history.php');
-        renderKitchenHistory(payload.history || []);
+        allKitchenHistory = payload.history || [];
+        renderKitchenHistory(allKitchenHistory);
     } catch (error) {
         toast(error.message, true);
     }
 }
+
+function filterKitchenHistory() {
+    const dateFrom = kitchenHistoryFilters.dateFrom.value;
+    const dateTo = kitchenHistoryFilters.dateTo.value;
+    const timeFrom = kitchenHistoryFilters.timeFrom.value;
+    const timeTo = kitchenHistoryFilters.timeTo.value;
+    const dish = kitchenHistoryFilters.dish.value;
+    const selectedEmps = Array.from(kitchenHistoryFilters.employee.selectedOptions).map((o) => o.textContent.toLowerCase());
+
+    const filtered = allKitchenHistory.filter((entry) => {
+        const dt = new Date(entry.created_at.replace(' ', 'T'));
+        if (isNaN(dt)) return true;
+
+        if (dateFrom) {
+            const from = new Date(dateFrom + 'T00:00:00');
+            if (dt < from) return false;
+        }
+        if (dateTo) {
+            const to = new Date(dateTo + 'T23:59:59');
+            if (dt > to) return false;
+        }
+        if (timeFrom) {
+            const [h, m] = timeFrom.split(':').map(Number);
+            const mins = h * 60 + m;
+            if (dt.getHours() * 60 + dt.getMinutes() < mins) return false;
+        }
+        if (timeTo) {
+            const [h, m] = timeTo.split(':').map(Number);
+            const mins = h * 60 + m;
+            if (dt.getHours() * 60 + dt.getMinutes() > mins) return false;
+        }
+        if (dish && entry.dish_name !== dish) return false;
+        if (selectedEmps.length && !selectedEmps.includes((entry.employee_name || '').toLowerCase())) return false;
+        return true;
+    });
+
+    renderKitchenHistory(filtered);
+}
+
+if (kitchenHistoryFilters.apply) kitchenHistoryFilters.apply.addEventListener('click', filterKitchenHistory);
+if (kitchenHistoryFilters.clear) kitchenHistoryFilters.clear.addEventListener('click', () => {
+    kitchenHistoryFilters.dateFrom.value = '';
+    kitchenHistoryFilters.dateTo.value = '';
+    kitchenHistoryFilters.timeFrom.value = '';
+    kitchenHistoryFilters.timeTo.value = '';
+    kitchenHistoryFilters.dish.value = '';
+    Array.from(kitchenHistoryFilters.employee.options).forEach((o) => (o.selected = false));
+    renderKitchenHistory(allKitchenHistory);
+});
 
 function renderKitchenHistory(history) {
     kitchenHistoryList.textContent = '';
@@ -286,4 +393,11 @@ btnKitchenHistory.addEventListener('click', () => {
 btnKitchenHistoryClose.addEventListener('click', () => {
     kitchenHistoryModal.classList.add('hidden');
 });
+
+const btnKitchenHistoryX = document.getElementById('btn_kitchen_history_x');
+if (btnKitchenHistoryX) {
+    btnKitchenHistoryX.addEventListener('click', () => {
+        kitchenHistoryModal.classList.add('hidden');
+    });
+}
 

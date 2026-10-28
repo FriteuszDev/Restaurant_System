@@ -6,6 +6,7 @@ require_json_access('add_dishes');
 $name = trim((string) ($_POST['name'] ?? $_POST['dish_name'] ?? ''));
 $desc = trim((string) ($_POST['desc'] ?? $_POST['dish_desc'] ?? ''));
 $price = $_POST['price'] ?? $_POST['dish_price'] ?? '';
+$categoryId = (int) ($_POST['category_id'] ?? $_POST['dish_category_id'] ?? 0);
 
 if ($name === '' || mb_strlen($name) > 100) {
     json_out(['success' => false, 'message' => 'Dish name must be 1-100 characters.'], 400);
@@ -112,13 +113,14 @@ if (isset($_FILES['image']) && is_array($_FILES['image']) && (int) ($_FILES['ima
 try {
     $pdo = db();
 
-    $sql = "INSERT INTO menu (dish_name, dish_desc, dish_price) VALUES (:dish_name, :dish_desc, :dish_price)";
+    $sql = "INSERT INTO menu (dish_name, dish_desc, dish_price, category_id) VALUES (:dish_name, :dish_desc, :dish_price, :category_id)";
     $stmt = $pdo->prepare($sql);
 
     $stmt->execute([
         'dish_name' => $name,
         'dish_desc' => $desc,
         'dish_price' => $price,
+        'category_id' => $categoryId > 0 ? $categoryId : null,
     ]);
 
     $dish = [
@@ -126,6 +128,7 @@ try {
         'dish_name' => $name,
         'dish_desc' => $desc,
         'dish_price' => number_format((float) $price, 2, '.', ''),
+        'category_id' => $categoryId > 0 ? $categoryId : null,
     ];
 
     if (is_ajax_request()) {

@@ -325,7 +325,7 @@
                     dish_name: cellText(tr.querySelector('[data-field="dish_name"]')),
                     dish_desc: cellText(tr.querySelector('[data-field="dish_desc"]')),
                     dish_price: cellText(tr.querySelector('[data-field="dish_price"]')),
-                    dish_name: cellText(tr.querySelector('[data-field="dish_name"]'))
+                    category_id: (tr.querySelector('[data-field="category_id"] select') || {}).value || ''
                 });
             });
             return { rows: rows, deleted: deleted };
@@ -353,15 +353,72 @@
                     if (input) input.value = row[field] || '';
                     else td.textContent = row[field] || '';
                 });
+                var catSelect = tr.querySelector('[data-field="category_id"] select');
+                if (catSelect) catSelect.value = row.category_id || '';
             });
         },
         enable: function () {
-            enableTextCells('.tr_menu[data-dish-id] [data-field]', !!CAN.edit_dishes);
+            enableTextCells('.tr_menu[data-dish-id] [data-field]:not([data-field="category_id"])', !!CAN.edit_dishes);
+            document.querySelectorAll('.tr_menu[data-dish-id] [data-field="category_id"] select').forEach(function (sel) {
+                sel.disabled = !CAN.edit_dishes;
+            });
         },
         disable: function () {
-            disableTextCells('.tr_menu[data-dish-id] [data-field]');
+            disableTextCells('.tr_menu[data-dish-id] [data-field]:not([data-field="category_id"])');
+            document.querySelectorAll('.tr_menu[data-dish-id] [data-field="category_id"] select').forEach(function (sel) {
+                sel.disabled = true;
+            });
         }
     });
+
+    EditMode.initSection('categories', {
+        collect: function () {
+            var rows = [];
+            var deleted = [];
+            document.querySelectorAll('.tr_categories[data-category-id]').forEach(function (tr) {
+                var id = tr.getAttribute('data-category-id');
+                if (tr.dataset.deleted === '1') {
+                    deleted.push(id);
+                    return;
+                }
+                rows.push({
+                    category_id: id,
+                    category_name: cellText(tr.querySelector('[data-field="category_name"]'))
+                });
+            });
+            return { rows: rows, deleted: deleted };
+        },
+        apply: function (data) {
+            var deleted = {};
+            (data.deleted || []).forEach(function (id) { deleted[String(id)] = true; });
+            var byId = {};
+            (data.rows || []).forEach(function (row) { byId[String(row.category_id)] = row; });
+            document.querySelectorAll('.tr_categories[data-category-id]').forEach(function (tr) {
+                var id = tr.getAttribute('data-category-id');
+                if (deleted[id]) {
+                    tr.dataset.deleted = '1';
+                    tr.style.display = 'none';
+                    return;
+                }
+                tr.dataset.deleted = '0';
+                tr.style.display = '';
+                var row = byId[id];
+                if (!row) return;
+                var td = tr.querySelector('[data-field="category_name"]');
+                if (!td) return;
+                var input = td.querySelector('.inline_edit');
+                if (input) input.value = row.category_name || '';
+                else td.textContent = row.category_name || '';
+            });
+        },
+        enable: function () {
+            enableTextCells('.tr_categories[data-category-id] [data-field]', !!CAN.edit_dishes);
+        },
+        disable: function () {
+            disableTextCells('.tr_categories[data-category-id] [data-field]');
+        }
+    });
+
 
     EditMode.initSection('employees', {
         collect: function () {
@@ -663,7 +720,7 @@
 
     document.addEventListener('input', function (e) {
         if (!e.target.classList.contains('inline_edit') && !e.target.classList.contains('emp_grade_select')) return;
-        ['menu', 'employees', 'grades', 'tables'].forEach(function (name) {
+        ['menu', 'employees', 'grades', 'tables', 'categories'].forEach(function (name) {
             if (EditMode.isOn(name) && e.target.closest('.config_' + name)) {
                 EditMode.schedulePush(name);
             }
@@ -671,6 +728,10 @@
     });
 
     document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('menu_category_select')) {
+            if (EditMode.isOn('menu')) EditMode.schedulePush('menu');
+            return;
+        }
         if (!e.target.classList.contains('emp_grade_select')) return;
         if (EditMode.isOn('employees')) EditMode.pushHistory('employees');
     });
@@ -697,6 +758,19 @@
                 dishRow.dataset.deleted = '1';
                 dishRow.style.display = 'none';
                 EditMode.pushHistory('menu');
+            }
+            return;
+        }
+
+var catDel = e.target.closest('.category_delete');
+        if (catDel) {
+            if (!requireEditMode('categories')) return;
+            if (!confirm('Delete this category? This will be applied when you save.')) return;
+            var catRow = catDel.closest('tr');
+            if (catRow) {
+                catRow.dataset.deleted = '1';
+                catRow.style.display = 'none';
+                EditMode.pushHistory('categories');
             }
             return;
         }
@@ -754,8 +828,16 @@
     });
 
     document.addEventListener('DOMContentLoaded', function () {
+        var showAddCategory = document.getElementById('btn_show_add_category');
+        var addCategoryForm = document.getElementById('add_category_form');
+        if (showAddCategory && addCategoryForm) {
+            showAddCategory.addEventListener('click', function () {
+                addCategoryForm.style.display = addCategoryForm.style.display === 'none' ? '' : 'none';
+            });
+        }
+
         var tabs = document.querySelectorAll('.tabs_container [data-tab]');
-        var sections = document.querySelectorAll('.config_menu, .config_employees, .config_grades, .config_tables, .config_settings');
+        var sections = document.querySelectorAll('.config_menu, .config_employees, .config_grades, .config_tables, .config_settings, .config_categories');
         tabs.forEach(function (tab) {
             tab.addEventListener('click', function () {
                 var name = this.getAttribute('data-tab');

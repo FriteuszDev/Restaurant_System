@@ -3,6 +3,8 @@ const API_PATH = '../../php/';
 const state = {
     floors: (window.INITIAL && window.INITIAL.floors) || [],
     menu: (window.INITIAL && window.INITIAL.menu) || [],
+    categories: (window.INITIAL && window.INITIAL.categories) || [],
+    activeCategoryId: null,
     sessions: [],
     items: [],
     openTableId: null,
@@ -100,7 +102,7 @@ function itemsForSession(sessionId) {
 }
 
 function statusLabel(status) {
-    if (status === 'open' || status === 'occupied') return 'Occupied';
+    if (status === 'open' || status === 'occupied') return '';
     if (status === 'to_pay') return 'To pay';
     return 'Free';
 }
@@ -218,12 +220,10 @@ function renderSidebar() {
             if (readyCount > 0) {
                 badge.textContent = readyCount;
                 badge.classList.add('badge_ready');
+                card.append(number, chairs, badge);
             } else {
-                badge.textContent = tableStatusLabel(tStatus);
-                badge.classList.add('badge_status');
+                card.append(number, chairs);
             }
-
-            card.append(number, chairs, badge);
 
             tablesBox.appendChild(card);
         });
@@ -241,6 +241,7 @@ const tableView = document.getElementById('table_view');
 const ordersList = document.getElementById('orders_list');
 const menuPanel = document.getElementById('menu_panel');
 const menuList = document.getElementById('menu_list');
+const menuCategories = document.getElementById('menu_categories');
 const cartList = document.getElementById('cart_list');
 const sendOrderButton = document.getElementById('btn_send_order');
 const closeTableFooter = document.getElementById('table_view_footer');
@@ -419,17 +420,47 @@ function renderCart() {
 }
 
 function renderMenu() {
+    if (menuCategories) {
+        menuCategories.textContent = '';
+        const allTab = document.createElement('button');
+        allTab.type = 'button';
+        allTab.className = 'menu_category_tab' + (state.activeCategoryId === null ? ' active' : '');
+        allTab.textContent = 'All';
+        allTab.addEventListener('click', () => {
+            state.activeCategoryId = null;
+            renderMenu();
+        });
+        menuCategories.appendChild(allTab);
+
+        (state.categories || []).forEach((cat) => {
+            const tab = document.createElement('button');
+            tab.type = 'button';
+            tab.className = 'menu_category_tab' + (state.activeCategoryId === Number(cat.category_id) ? ' active' : '');
+            tab.textContent = cat.category_name;
+            tab.addEventListener('click', () => {
+                state.activeCategoryId = Number(cat.category_id);
+                renderMenu();
+            });
+            menuCategories.appendChild(tab);
+        });
+    }
+
     menuList.textContent = '';
 
-    if (!state.menu.length) {
+    let dishes = state.menu;
+    if (state.activeCategoryId !== null) {
+        dishes = state.menu.filter((dish) => Number(dish.category_id) === Number(state.activeCategoryId));
+    }
+
+    if (!dishes.length) {
         const empty = document.createElement('div');
         empty.className = 'orders_empty';
-        empty.textContent = 'Menu jest puste.';
+        empty.textContent = 'Menu is empty.';
         menuList.appendChild(empty);
         return;
     }
 
-    state.menu.forEach((dish) => {
+    dishes.forEach((dish) => {
         const dishBox = document.createElement('div');
         dishBox.className = 'menu_dish';
         dishBox.dataset.dishId = String(dish.dish_id);
@@ -444,7 +475,7 @@ function renderMenu() {
 
         const add = document.createElement('i');
         add.className = 'fa-solid fa-plus menu_dish_add';
-        add.title = 'Dodaj do koszyka';
+        add.title = 'Add to cart';
 
         dishBox.append(name, price, add);
         menuList.appendChild(dishBox);
@@ -475,6 +506,7 @@ function renderTableView(rebuildCart = false) {
     const statusBadge = document.getElementById('tv_status');
     statusBadge.textContent = statusLabel(session.status);
     statusBadge.className = 'status_badge badge_' + session.status;
+    statusBadge.style.display = statusBadge.textContent ? '' : 'none';
 
     renderOrders();
 
@@ -845,50 +877,168 @@ document.getElementById('btn_skip_pay').addEventListener('click', () => {
 
 const historyList = document.getElementById('history_list');
 
+const waiterHistoryFilters = {
+    dateFrom: document.getElementById('wh_date_from'),
+    dateTo: document.getElementById('wh_date_to'),
+    timeFrom: document.getElementById('wh_time_from'),
+    timeTo: document.getElementById('wh_time_to'),
+    dish: document.getElementById('wh_dish'),
+    employee: document.getElementById('wh_employee'),
+    apply: document.getElementById('wh_apply'),
+    clear: document.getElementById('wh_clear'),
+};
+
+// Populate dish select grouped by category
+const waiterDishSelect = waiterHistoryFilters.dish;
+if (waiterDishSelect && state.menu) {
+    const groups = {};
+    state.menu.forEach((d) => {
+        const cat = d.category_name || 'Uncategorized';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(d);
+    });
+    Object.keys(groups).forEach((cat) => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = cat;
+        groups[cat].forEach((d) => {
+            const opt = document.createElement('option');
+            opt.value = d.dish_name;
+            opt.textContent = d.dish_name;
+            optgroup.appendChild(opt);
+        });
+        waiterDishSelect.appendChild(optgroup);
+    });
+}
+
+// Populate employee select grouped by grade
+const waiterEmpSelect = waiterHistoryFilters.employee;
+if (waiterEmpSelect && (window.INITIAL && window.INITIAL.employees)) {
+    const groups = {};
+    window.INITIAL.employees.forEach((e) => {
+        const grade = e.grade_name || 'No position';
+        if (!groups[grade]) groups[grade] = [];
+        groups[grade].push(e);
+    });
+    Object.keys(groups).forEach((grade) => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = grade;
+        groups[grade].forEach((e) => {
+            const opt = document.createElement('option');
+            opt.value = e.employee_id;
+            opt.textContent = e.employee_name + ' ' + e.employee_surname;
+            optgroup.appendChild(opt);
+        });
+        waiterEmpSelect.appendChild(optgroup);
+    });
+}
+
+let allOrderHistory = [];
+
+function renderWaiterHistory(history) {
+    historyList.textContent = '';
+    if (!history.length) {
+        historyList.textContent = 'History is empty.';
+        return;
+    }
+
+    history.forEach((session) => {
+        const details = document.createElement('details');
+        details.className = 'history_entry';
+
+        const summary = document.createElement('summary');
+        summary.textContent =
+            'Table #' + session.table_number +
+            ' (' + session.floor_name + ') - ' +
+            Number(session.total).toFixed(2) + ' - ' +
+            'paid: ' + (session.paid_at || '-') +
+            (session.paid_by_name ? ' by ' + session.paid_by_name : '');
+        details.appendChild(summary);
+
+        session.items.forEach((item) => {
+            const line = document.createElement('div');
+            line.className = 'summary_line';
+
+            const name = document.createElement('span');
+            name.textContent = item.dish_name + ' x' + item.quantity + (item.note ? ' (' + item.note + ')' : '');
+            line.appendChild(name);
+
+            const price = document.createElement('span');
+            price.className = 'summary_line_price';
+            price.textContent = (Number(item.dish_price) * Number(item.quantity)).toFixed(2) + ' ';
+            line.appendChild(price);
+
+            details.appendChild(line);
+        });
+
+        historyList.appendChild(details);
+    });
+}
+
+function filterWaiterHistory() {
+    const dateFrom = waiterHistoryFilters.dateFrom.value;
+    const dateTo = waiterHistoryFilters.dateTo.value;
+    const timeFrom = waiterHistoryFilters.timeFrom.value;
+    const timeTo = waiterHistoryFilters.timeTo.value;
+    const dish = waiterHistoryFilters.dish.value;
+    const selectedEmps = Array.from(waiterHistoryFilters.employee.selectedOptions).map((o) => o.textContent.toLowerCase());
+
+    const filtered = allOrderHistory.filter((session) => {
+        const dt = new Date((session.paid_at || '').replace(' ', 'T'));
+        if (!isNaN(dt)) {
+            if (dateFrom) {
+                const from = new Date(dateFrom + 'T00:00:00');
+                if (dt < from) return false;
+            }
+            if (dateTo) {
+                const to = new Date(dateTo + 'T23:59:59');
+                if (dt > to) return false;
+            }
+            if (timeFrom) {
+                const [h, m] = timeFrom.split(':').map(Number);
+                const mins = h * 60 + m;
+                if (dt.getHours() * 60 + dt.getMinutes() < mins) return false;
+            }
+            if (timeTo) {
+                const [h, m] = timeTo.split(':').map(Number);
+                const mins = h * 60 + m;
+                if (dt.getHours() * 60 + dt.getMinutes() > mins) return false;
+            }
+        }
+        if (dish) {
+            const hasDish = (session.items || []).some((i) => i.dish_name === dish);
+            if (!hasDish) return false;
+        }
+        if (selectedEmps.length && !selectedEmps.includes((session.paid_by_name || '').toLowerCase())) return false;
+        return true;
+    });
+
+    renderWaiterHistory(filtered);
+}
+
+if (waiterHistoryFilters.apply) waiterHistoryFilters.apply.addEventListener('click', filterWaiterHistory);
+if (waiterHistoryFilters.clear) waiterHistoryFilters.clear.addEventListener('click', () => {
+    waiterHistoryFilters.dateFrom.value = '';
+    waiterHistoryFilters.dateTo.value = '';
+    waiterHistoryFilters.timeFrom.value = '';
+    waiterHistoryFilters.timeTo.value = '';
+    waiterHistoryFilters.dish.value = '';
+    Array.from(waiterHistoryFilters.employee.options).forEach((o) => (o.selected = false));
+    renderWaiterHistory(allOrderHistory);
+});
+
 document.getElementById('btn_history').addEventListener('click', async () => {
     historyModal.classList.remove('hidden');
     historyList.textContent = 'Loading history...';
 
     try {
         const payload = await getJson('get_history.php');
+        allOrderHistory = payload.history || [];
         historyList.textContent = '';
-
-        if (!payload.history.length) {
+        if (!allOrderHistory.length) {
             historyList.textContent = 'History is empty.';
             return;
         }
-
-        payload.history.forEach((session) => {
-            const details = document.createElement('details');
-            details.className = 'history_entry';
-
-            const summary = document.createElement('summary');
-            summary.textContent =
-                'Table #' + session.table_number +
-                ' (' + session.floor_name + ') - ' +
-                Number(session.total).toFixed(2) + ' - ' +
-                'paid: ' + (session.paid_at || '-') +
-                (session.paid_by_name ? ' by ' + session.paid_by_name : '');
-            details.appendChild(summary);
-
-            session.items.forEach((item) => {
-                const line = document.createElement('div');
-                line.className = 'summary_line';
-
-                const name = document.createElement('span');
-                name.textContent = item.dish_name + ' x' + item.quantity + (item.note ? ' (' + item.note + ')' : '');
-                line.appendChild(name);
-
-                const price = document.createElement('span');
-                price.className = 'summary_line_price';
-                price.textContent = (Number(item.dish_price) * Number(item.quantity)).toFixed(2) + ' ';
-                line.appendChild(price);
-
-                details.appendChild(line);
-            });
-
-            historyList.appendChild(details);
-        });
+        renderWaiterHistory(allOrderHistory);
     } catch (error) {
         historyList.textContent = error.message;
     }
@@ -897,6 +1047,13 @@ document.getElementById('btn_history').addEventListener('click', async () => {
 document.getElementById('btn_history_close').addEventListener('click', () => {
     historyModal.classList.add('hidden');
 });
+
+const btnHistoryX = document.getElementById('btn_history_x');
+if (btnHistoryX) {
+    btnHistoryX.addEventListener('click', () => {
+        historyModal.classList.add('hidden');
+    });
+}
 
 ///////////////////////////////////////////////////////////////
 // Odswiezanie (AJAX) + powiadomienia

@@ -1,3 +1,107 @@
+.add_category_form .btn_dish_add {
+    width: auto !important;
+    min-width: 0;
+    padding: 4px 10px;
+    font-size: 82%;
+    height: auto;
+    min-height: 0;
+}
+
+.btn_category_add {
+    padding: 6px 12px;
+    font-size: 85%;
+    border-radius: 6px;
+    border: none;
+    background-color: rgb(46, 125, 50);
+    color: white;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.btn_category_add:hover {
+    background-color: rgb(38, 102, 41);
+}
+
+.btn_category_add:active {
+    transform: none;
+    box-shadow: none;
+}
+
+.add_category_form button,
+.add_category_form .btn_dish_add {
+    padding: 4px 10px;
+    font-size: 82%;
+    min-width: 0;
+}
+
+.btn_category_add {
+    padding: 6px 12px;
+    font-size: 85%;
+    border-radius: 6px;
+}
+
+.categories {
+    padding: 16px;
+}
+
+.table_categories {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table_categories th,
+.table_categories td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table_categories .td_categories_name {
+    min-width: 200px;
+}
+
+body {
+    min-width: 1000px;
+}
+
+.btn_category_add {
+    padding: 6px 12px;
+    font-size: 85%;
+    border-radius: 6px;
+}
+
+.category_name_input {
+    width: 100%;
+    max-width: 260px;
+    padding: 8px 10px;
+    border: 1px solid #cfcfcf;
+    border-radius: 8px;
+    font-size: 92%;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.category_name_input:focus {
+    border-color: rgb(46, 125, 50);
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+.table_menu tr {
+    border-bottom: 1px solid #ececec;
+}
+
+.table_menu .td_menu_category {
+    border-left: 1px solid #f1f1f1;
+}
+
+.menu_category_select {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #d8d8d8;
+    border-radius: 6px;
+    background-color: white;
+}
+
 * {
     box-sizing: border-box;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -37,6 +141,7 @@ body {
 .tabs_container > .tab_employees,
 .tabs_container > .tab_grades,
 .tabs_container > .tab_tables,
+.tabs_container > .tab_categories,
 .tabs_container > .tab_settings {
     display: flex;
     align-items: center;
@@ -132,7 +237,8 @@ body {
 .config_menu,
 .config_employees,
 .config_grades,
-.config_tables {
+.config_tables,
+.config_categories {
     flex: 1 1 auto;
     min-width: 0;
     height: 100vh;
@@ -145,13 +251,15 @@ body {
 .config_menu.is-active,
 .config_employees.is-active,
 .config_grades.is-active,
-.config_tables.is-active {
+.config_tables.is-active,
+.config_categories.is-active {
     display: flex;
 }
 
 .menu,
 .employees,
-.grades {
+.grades,
+.categories {
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
@@ -177,7 +285,8 @@ body {
 
 .table_menu,
 .table_employees,
-.table_grades {
+.table_grades,
+.table_categories {
     width: 100%;
     border-collapse: collapse;
     font-family: Arial, sans-serif;
@@ -187,13 +296,18 @@ body {
 .th_menu,
 .td_menu,
 .td_menu_name,
-.td_menu_id {
+.td_menu_id,
+.th_categories,
+.td_categories,
+.td_categories_name,
+.td_categories_id {
     border: 1px solid #dddddd;
     text-align: left;
     padding: 8px;
 }
 
-.th_menu {
+.th_menu,
+.th_categories {
     background-color: #f2f2f2;
     position: sticky;
     top: 0;
