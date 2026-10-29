@@ -78,8 +78,8 @@ Restaurant_System/
 
 1. Skopiuj projekt do katalogu serwera (np. `htdocs`).  
    Copy the project into your server directory (e.g. `htdocs`).
-2. Zaimportuj bazę danych z `installation/new_dump_full.sql`.  
-   Import the database from `installation/new_dump_full.sql`.
+2. Zaimportuj bazę danych z `installation/restaurant_system.sql`.  
+   Import the database from `installation/restaurant_system.sql`.
 3. Skonfiguruj połączenie w `php/db.php` (host, nazwa bazy, użytkownik, hasło).  
    Configure the connection in `php/db.php`.
 4. Otwórz w przeglądarce: `http://localhost/Restaurant_System/client/index.php`  
